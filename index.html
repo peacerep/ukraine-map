@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+			integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+			crossorigin=""
+		/>
+		<script
+			src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+			integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+			crossorigin=""
+		></script>
+
+		<title>PeaceRep Maps</title>
+
+		<link rel="stylesheet" href="style.css" />
+
+		<!-- <script src="https://d3js.org/d3.v7.min.js"></script> -->
+		<!-- <script src="https://unpkg.com/topojson@3"></script> -->
+	</head>
+	<body>
+		<!-- to handle js-generated events -->
+		<!-- <div id="eventHandler" class="input hidden"></div> -->
+
+		<div class="grid-container">
+			<div id="map"></div>
+			<div id="sidebar">
+				<h1>Toggles + Filters</h1>
+			</div>
+		</div>
+
+		<script type="text/javascript" src="script.js"></script>
+	</body>
+</html>

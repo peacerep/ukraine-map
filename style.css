@@ -1,0 +1,31 @@
+* {
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+	font-family: sans-serif;
+}
+
+.grid-container {
+	display: grid;
+	grid-template-rows: 1fr;
+	grid-template-columns: 1fr 250px;
+	height: 100vh;
+	width: 100vw;
+	grid-template-rows: 100%;
+}
+
+#map {
+	grid-column: 1 / span 1;
+	grid-row: 1 / span 1;
+}
+
+#sidebar {
+	grid-column: 2 / span 1;
+	grid-row: 1 / span 1;
+	background-color: #eee;
+	padding: 10px;
+}
+
+.hidden {
+	display: none;
+}
