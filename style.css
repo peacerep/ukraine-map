@@ -5,6 +5,14 @@
 	font-family: sans-serif;
 }
 
+h1 {
+	margin: 5px 0 10px 0;
+}
+
+label {
+	padding: 5px;
+}
+
 .grid-container {
 	display: grid;
 	grid-template-rows: 1fr;

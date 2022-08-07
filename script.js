@@ -19,6 +19,7 @@ L.control.scale({ imperial: true, metric: true }).addTo(map);
 // datasets
 let acled = d3.csv("data/1900-01-01-2022-08-07-Ukraine.csv");
 let ucdp = d3.json("data/ucdp_ged_via_api.json");
+let layer_ucdp, layer_acled;
 
 // load data and add to map
 Promise.all([acled, ucdp]).then(function (data) {
@@ -32,7 +33,7 @@ Promise.all([acled, ucdp]).then(function (data) {
   d3.select("#loading-message").attr("class", "hidden");
 
   // add a marker w/ popup for each event
-  let layer_ucdp = L.layerGroup(
+  layer_ucdp = L.layerGroup(
     ucdp.map(function (event) {
       return L.circleMarker(
         { lon: event.longitude, lat: event.latitude },
@@ -42,7 +43,7 @@ Promise.all([acled, ucdp]).then(function (data) {
   );
   layer_ucdp.addTo(map);
 
-  let layer_acled = L.layerGroup(
+  layer_acled = L.layerGroup(
     acled.map(function (event) {
       return L.circleMarker(
         { lon: event.longitude, lat: event.latitude },
@@ -53,4 +54,20 @@ Promise.all([acled, ucdp]).then(function (data) {
   layer_acled.addTo(map);
 
   // end promise
+});
+
+// checkboxes to toggle layers on and off
+document.getElementById("toggleACLED").addEventListener("change", (event) => {
+  if (event.currentTarget.checked) {
+    layer_acled.addTo(map);
+  } else {
+    layer_acled.remove();
+  }
+});
+document.getElementById("toggleUCDP").addEventListener("change", (event) => {
+  if (event.currentTarget.checked) {
+    layer_ucdp.addTo(map);
+  } else {
+    layer_ucdp.remove();
+  }
 });
