@@ -1,5 +1,10 @@
 // initialize Leaflet
-var map = L.map("map").setView({ lon: 0, lat: 0 }, 2);
+var map = L.map("map")
+  // zoom to Ukraine
+  .fitBounds([
+    [52.487125, 21.641782],
+    [43.814742, 39.073691],
+  ]);
 
 // add the OpenStreetMap tiles
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -8,42 +13,44 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>',
 }).addTo(map);
 
-// show the scale bar on the lower left corner
+// show scale bar on the lower left corner
 L.control.scale({ imperial: true, metric: true }).addTo(map);
 
-d3.json(
-  "https://ucdpapi.pcr.uu.se/api/gedevents/21.1?pagesize=1000&StartDate=2020-01-01"
-).then(function (data) {
+// datasets
+let acled = d3.csv("data/1900-01-01-2022-08-07-Ukraine.csv");
+let ucdp = d3.json("data/ucdp_ged_via_api.json");
+
+// load data and add to map
+Promise.all([acled, ucdp]).then(function (data) {
   console.log(data);
 
-  // let ucdp = data.Result;
+  let acled = data[0];
+  let ucdp = data[1].Result;
+  // let ucdp = data[0].Result;
 
-  // if (data.TotalPages < 20) {
-  //   for (let i = 0; i < 3; i++) {
-  //     let nextPage =
-  //       "https://ucdpapi.pcr.uu.se/api/gedevents/21.1?pagesize=1000&StartDate=2020-01-01&page=" +
-  //       i;
-  //     d3.json(nextPage).then(function (d) {
-  //       console.log(d);
-  //     });
-  //   }
-  //   // doesn't work
-  //   console.log(ucdp);
-  //   // }
-  // } else {
-  //   console.log(
-  //     "Trying to load too much data at once, page count: ",
-  //     data.TotalPages
-  //   );
-  // }
-
-  // remove loading message when data is loaded
+  // // remove loading message when data is loaded
   d3.select("#loading-message").attr("class", "hidden");
 
   // add a marker w/ popup for each event
-  data.Result.forEach(function (event) {
-    L.marker({ lon: event.longitude, lat: event.latitude })
-      .bindPopup(event.where_description)
-      .addTo(map);
-  });
+  let layer_ucdp = L.layerGroup(
+    ucdp.map(function (event) {
+      return L.circleMarker(
+        { lon: event.longitude, lat: event.latitude },
+        { fillColor: "red", fillOpacity: 1, stroke: false, radius: 4 }
+      ).bindPopup(event.where_description);
+    })
+  );
+  layer_ucdp.addTo(map);
+
+  let layer_acled = L.layerGroup(
+    acled.map(function (event) {
+      return L.circleMarker(
+        { lon: event.longitude, lat: event.latitude },
+        { fillOpacity: 1, stroke: false, radius: 4 }
+      ).bindPopup(event.notes);
+    })
+  );
+  layer_acled.addTo(map);
+
+  // end promise
 });

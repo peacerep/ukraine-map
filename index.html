@@ -4,6 +4,12 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+		<!-- https://css-tricks.com/emoji-as-a-favicon/ -->
+		<link
+			rel="icon"
+			href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗺</text></svg>"
+		/>
+
 		<link
 			rel="stylesheet"
 			href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
@@ -33,9 +39,11 @@
 				<h1>Toggles + Filters</h1>
 				<input type="checkbox" name="UCDP" /><label for="UCDP"
 					>UCDP</label
-				><span id="loading-message">(loading...)</span>
+				>
 			</div>
 		</div>
+
+		<div id="loading-message">Loading data...</div>
 
 		<script type="text/javascript" src="script.js"></script>
 	</body>
