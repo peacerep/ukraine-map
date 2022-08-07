@@ -1,87 +1,80 @@
-// initialize Leaflet
-var map = L.map("map")
-  // zoom to Ukraine
-  .fitBounds([
-    [52.487125, 21.641782],
-    [43.814742, 39.073691],
-  ]);
+var map = new maplibregl.Map({
+  container: "map",
+  style:
+    "https://api.maptiler.com/maps/bright/style.json?key=29pOogG422DKpW4WspFu",
+  center: [0, 0],
+  zoom: 1,
+  bounds: [
+    [22, 43],
+    [41.5, 53],
+  ],
+});
 
-// add the OpenStreetMap tiles
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19,
-  attribution:
-    '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>',
-}).addTo(map);
-
-// show scale bar on the lower left corner
-L.control.scale({ imperial: true, metric: true }).addTo(map);
-
-// datasets
-let acled = d3.csv("data/1900-01-01-2022-08-07-Ukraine.csv");
-let ucdp = d3.json("data/ucdp_ged_via_api.json");
-let layer_ucdp, layer_acled;
+// add scale bar?
 
 let fillColor = d3.scaleOrdinal(d3.schemeCategory10);
 
-// load data and add to map
-Promise.all([acled, ucdp]).then(function (data) {
-  console.log(data);
+// // remove loading message when data is loaded
+d3.select("#loading-message").attr("class", "hidden");
 
-  let acled = data[0];
-  let ucdp = data[1].Result;
-  // let ucdp = data[0].Result;
+map.on("load", function () {
+  map.addSource("acled", {
+    type: "geojson",
+    data: "data/1900-01-01-2022-08-07-Ukraine.geojson",
+  });
 
-  // // remove loading message when data is loaded
-  d3.select("#loading-message").attr("class", "hidden");
+  map.addSource("ucdp", {
+    type: "geojson",
+    data: "data/ucdp_geojson.json",
+  });
 
-  // add a marker w/ popup for each event
-  layer_ucdp = L.layerGroup(
-    ucdp.map(function (event) {
-      return L.circleMarker(
-        { lon: event.longitude, lat: event.latitude },
-        {
-          radius: 4,
-          fillColor: "red",
-          fillOpacity: 1,
-          color: "#fff",
-          weight: 1,
-        }
-      ).bindPopup(event.where_description);
-    })
-  );
-  layer_ucdp.addTo(map);
+  map.addLayer({
+    id: "acled_events",
+    type: "circle",
+    source: "acled",
+    paint: {
+      "circle-color": "blue",
+      // [
+      // 'case',
+      // mag1,
+      // colors[0],
+      // mag2,
+      // colors[1],
+      // mag3,
+      // colors[2],
+      // mag4,
+      // colors[3],
+      // colors[4]
+      // ],
+      "circle-opacity": 0.6,
+      "circle-radius": 4,
+    },
+  });
 
-  layer_acled = L.layerGroup(
-    acled.map(function (event) {
-      return L.circleMarker(
-        { lon: event.longitude, lat: event.latitude },
-        {
-          radius: 4,
-          fillColor: fillColor(event.event_type),
-          fillOpacity: 1,
-          color: "#fff",
-          weight: 1,
-        }
-      ).bindPopup(event.notes);
-    })
-  );
-  layer_acled.addTo(map);
-
-  // end promise
+  map.addLayer({
+    id: "ucdp_events",
+    type: "circle",
+    source: "ucdp",
+    paint: {
+      "circle-color": "red",
+      "circle-opacity": 0.6,
+      "circle-radius": 4,
+    },
+  });
 });
 
 // checkboxes to toggle layers on and off
 document.getElementById("toggleACLED").addEventListener("change", (event) => {
   if (event.currentTarget.checked) {
-    layer_acled.addTo(map);
+    map.setLayoutProperty("acled_events", "visibility", "visible");
   } else {
-    layer_acled.remove();
+    map.setLayoutProperty("acled_events", "visibility", "none");
   }
 });
 document.getElementById("toggleUCDP").addEventListener("change", (event) => {
   if (event.currentTarget.checked) {
-    layer_ucdp.addTo(map);
+    map.setLayoutProperty("ucdp_events", "visibility", "visible");
   } else {
-    layer_ucdp.remove();
+    map.setLayoutProperty("ucdp_events", "visibility", "none");
   }
 });
