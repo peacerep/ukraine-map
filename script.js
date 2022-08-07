@@ -1,3 +1,5 @@
+"use strict";
+
 var map = new maplibregl.Map({
   container: "map",
   style:
@@ -12,7 +14,53 @@ var map = new maplibregl.Map({
 
 // add scale bar?
 
-let fillColor = d3.scaleOrdinal(d3.schemeCategory10);
+// ACLED event_type color scheme
+let colorSchemeACLED = [
+  ["Battles", d3.schemeTableau10[0]],
+  ["Explosions/Remote violence", d3.schemeTableau10[1]],
+  ["Protests", d3.schemeTableau10[2]],
+  ["Riots", d3.schemeTableau10[3]],
+  ["Strategic developments", d3.schemeTableau10[4]],
+  ["Violence against civilians", d3.schemeTableau10[5]],
+];
+
+// UCDP type_of_violence color scheme
+let colorSchemeUCDP = [
+  [1, d3.schemeTableau10[6]],
+  [2, d3.schemeTableau10[7]],
+  [3, d3.schemeTableau10[8]],
+];
+
+// add legends
+let acledLegend = d3
+  .select("#acled_legend")
+  .selectAll("div")
+  .data(colorSchemeACLED)
+  .enter()
+  .append("div");
+acledLegend
+  .append("div")
+  .attr("class", "legendCircle")
+  .style("background-color", (d) => d[1]);
+acledLegend
+  .append("div")
+  .attr("class", "legendLabel")
+  .html((d) => d[0]);
+
+let ucdpLegend = d3
+  .select("#ucdp_legend")
+  .selectAll("div")
+  .data(colorSchemeUCDP)
+  .enter()
+  .append("div");
+ucdpLegend
+  .append("div")
+  .attr("class", "legendCircle")
+  .style("background-color", (d) => d[1]);
+ucdpLegend
+  .append("div")
+  .attr("class", "legendLabel")
+  .html((d) => "Type " + d[0]);
 
 // // remove loading message when data is loaded
 d3.select("#loading-message").attr("class", "hidden");
@@ -33,20 +81,13 @@ map.on("load", function () {
     type: "circle",
     source: "acled",
     paint: {
-      "circle-color": "blue",
-      // [
-      // 'case',
-      // mag1,
-      // colors[0],
-      // mag2,
-      // colors[1],
-      // mag3,
-      // colors[2],
-      // mag4,
-      // colors[3],
-      // colors[4]
-      // ],
-      "circle-opacity": 0.6,
+      "circle-color": [
+        "match",
+        ["get", "event_type"],
+        ...colorSchemeACLED.flat(),
+        d3.schemeTableau10[9],
+      ],
+      "circle-opacity": 0.7,
       "circle-radius": 4,
     },
   });
@@ -56,8 +97,13 @@ map.on("load", function () {
     type: "circle",
     source: "ucdp",
     paint: {
-      "circle-color": "red",
-      "circle-opacity": 0.6,
+      "circle-color": [
+        "match",
+        ["get", "type_of_violence"],
+        ...colorSchemeUCDP.flat(),
+        d3.schemeTableau10[9],
+      ],
+      "circle-opacity": 0.7,
       "circle-radius": 4,
     },
   });
