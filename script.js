@@ -21,6 +21,8 @@ let acled = d3.csv("data/1900-01-01-2022-08-07-Ukraine.csv");
 let ucdp = d3.json("data/ucdp_ged_via_api.json");
 let layer_ucdp, layer_acled;
 
+let fillColor = d3.scaleOrdinal(d3.schemeCategory10);
+
 // load data and add to map
 Promise.all([acled, ucdp]).then(function (data) {
   console.log(data);
@@ -37,7 +39,13 @@ Promise.all([acled, ucdp]).then(function (data) {
     ucdp.map(function (event) {
       return L.circleMarker(
         { lon: event.longitude, lat: event.latitude },
-        { fillColor: "red", fillOpacity: 1, stroke: false, radius: 4 }
+        {
+          radius: 4,
+          fillColor: "red",
+          fillOpacity: 1,
+          color: "#fff",
+          weight: 1,
+        }
       ).bindPopup(event.where_description);
     })
   );
@@ -47,7 +55,13 @@ Promise.all([acled, ucdp]).then(function (data) {
     acled.map(function (event) {
       return L.circleMarker(
         { lon: event.longitude, lat: event.latitude },
-        { fillOpacity: 1, stroke: false, radius: 4 }
+        {
+          radius: 4,
+          fillColor: fillColor(event.event_type),
+          fillOpacity: 1,
+          color: "#fff",
+          weight: 1,
+        }
       ).bindPopup(event.notes);
     })
   );
