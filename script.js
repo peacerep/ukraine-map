@@ -17,52 +17,50 @@ var map = new maplibregl.Map({
 // add scale bar?
 
 // ACLED event_type color scheme
-let colorSchemeACLED = [
-  ["Battles", d3.schemeTableau10[0]],
-  ["Explosions/Remote violence", d3.schemeTableau10[1]],
-  ["Protests", d3.schemeTableau10[2]],
-  ["Riots", d3.schemeTableau10[3]],
-  ["Strategic developments", d3.schemeTableau10[4]],
-  ["Violence against civilians", d3.schemeTableau10[5]],
-];
-
-// UCDP type_of_violence color scheme
-let colorSchemeUCDP = [
-  [1, d3.schemeTableau10[6]],
-  [2, d3.schemeTableau10[7]],
-  [3, d3.schemeTableau10[8]],
-];
+let colorScheme = {
+  acled: [
+    ["Battles", d3.schemeTableau10[0]],
+    ["Explosions/Remote violence", d3.schemeTableau10[1]],
+    ["Protests", d3.schemeTableau10[2]],
+    ["Riots", d3.schemeTableau10[3]],
+    ["Strategic developments", d3.schemeTableau10[4]],
+    ["Violence against civilians", d3.schemeTableau10[5]],
+  ],
+  // UCDP type_of_violence color scheme
+  ucdp: [
+    [1, d3.schemeTableau10[6]],
+    [2, d3.schemeTableau10[7]],
+    [3, d3.schemeTableau10[8]],
+  ],
+};
 
 // add legends
-let acledLegend = d3
-  .select("#acled_legend")
-  .selectAll("div")
-  .data(colorSchemeACLED)
-  .enter()
-  .append("div");
-acledLegend
-  .append("div")
-  .attr("class", "legendCircle")
-  .style("background-color", (d) => d[1]);
-acledLegend
-  .append("div")
-  .attr("class", "legendLabel")
-  .html((d) => d[0]);
+["acled", "ucdp"].forEach(function (dataset) {
+  let legend = d3
+    .select(`#${dataset}_legend`)
+    .selectAll("tr")
+    .data(colorScheme[dataset])
+    .enter()
+    .append("tr")
+    .attr("class", "legendItem");
+  legend
+    .append("td")
+    .append("div")
+    .attr("class", "legendCircle")
+    .style("background-color", (d) => d[1]);
+  legend
+    .append("td")
+    .attr("class", "legendLabel")
+    .html((d) => d[0]);
 
-let ucdpLegend = d3
-  .select("#ucdp_legend")
-  .selectAll("div")
-  .data(colorSchemeUCDP)
-  .enter()
-  .append("div");
-ucdpLegend
-  .append("div")
-  .attr("class", "legendCircle")
-  .style("background-color", (d) => d[1]);
-ucdpLegend
-  .append("div")
-  .attr("class", "legendLabel")
-  .html((d) => "Type " + d[0]);
+  legend.on("click", function () {
+    if (d3.select(this).classed("disabled")) {
+      d3.select(this).classed("disabled", false);
+    } else {
+      d3.select(this).classed("disabled", true);
+    }
+  });
+});
 
 // // remove loading message when data is loaded
 d3.select("#loading-message").attr("class", "hidden");
@@ -86,7 +84,7 @@ map.on("load", function () {
       "circle-color": [
         "match",
         ["get", "event_type"],
-        ...colorSchemeACLED.flat(),
+        ...colorScheme.acled.flat(),
         d3.schemeTableau10[9],
       ],
       "circle-opacity": 0.7,
@@ -102,7 +100,7 @@ map.on("load", function () {
       "circle-color": [
         "match",
         ["get", "type_of_violence"],
-        ...colorSchemeUCDP.flat(),
+        ...colorScheme.ucdp.flat(),
         d3.schemeTableau10[9],
       ],
       "circle-opacity": 0.7,
