@@ -91,25 +91,6 @@ label {
 	z-index: 999; /*for shadow to show up*/
 }
 
-/*#loading-message {
-	display: block;
-	position: absolute;
-	margin: auto;
-	left: 0;
-	right: 0;
-	width: 300px;
-	top: calc(50vh - 112px);
-	z-index: 9999;
-	background-color: #ffffffb8;
-	border-radius: 20px;
-	font-weight: bold;
-	color: #333;
-	font-size: 22px;
-	padding: 45px;
-
-	text-align: center;
-}*/
-
 .legend {
 	margin-left: 20px;
 }

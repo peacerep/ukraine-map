@@ -5,6 +5,7 @@ const initBBox = [
   [41.5, 52.75], // [east, north]
 ];
 
+// map cannot be zoomed/panned outside of these bounds
 const maxBounds = [
   [initBBox[0][0] - 15, initBBox[0][1] - 10],
   [initBBox[1][0] + 15, initBBox[1][1] + 10],
@@ -14,19 +15,19 @@ var map = new maplibregl.Map({
   container: "map",
   style:
     "https://api.maptiler.com/maps/bright/style.json?key=29pOogG422DKpW4WspFu",
-  // center: [0, 0],
-  // zoom: 1,
   bounds: initBBox,
   maxBounds: maxBounds,
 });
 
+// set min zoom to be one less than the zoom calculated to fit the bbox
 const minZoom = map.getZoom() - 1;
 map.setMinZoom(minZoom);
 
 // add scale bar?
 
-// ACLED event_type color scheme
+// color schemes for all datasets
 let colorScheme = {
+  // ACLED event_type color scheme
   acled: [
     ["Battles", d3.schemeTableau10[0]],
     ["Explosions/Remote violence", d3.schemeTableau10[1]],
@@ -71,7 +72,7 @@ let colorScheme = {
   });
 });
 
-// add zoom to feature
+// add zoom to region feature
 d3.json("data/ukraine_bounds.json").then(function (data) {
   // get zoom options dropdown and add all admin regions as options
   let zoom_options = d3.select("#selectZoomTo");
@@ -100,6 +101,7 @@ d3.json("data/ukraine_bounds.json").then(function (data) {
   });
 });
 
+// when map is ready, add data sources + vis layers
 map.on("load", function () {
   map.addSource("acled", {
     type: "geojson",
@@ -120,7 +122,7 @@ map.on("load", function () {
         "match",
         ["get", "event_type"],
         ...colorScheme.acled.flat(),
-        d3.schemeTableau10[9],
+        d3.schemeTableau10[9], // grey for missing types
       ],
       "circle-opacity": 0.7,
       "circle-radius": 4,
@@ -136,7 +138,7 @@ map.on("load", function () {
         "match",
         ["get", "type_of_violence"],
         ...colorScheme.ucdp.flat(),
-        d3.schemeTableau10[9],
+        d3.schemeTableau10[9], // grey for missing types
       ],
       "circle-opacity": 0.7,
       "circle-radius": 4,
