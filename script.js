@@ -1,15 +1,17 @@
 "use strict";
 
+const initBBox = [
+  [22, 43],
+  [41.5, 53],
+];
+
 var map = new maplibregl.Map({
   container: "map",
   style:
     "https://api.maptiler.com/maps/bright/style.json?key=29pOogG422DKpW4WspFu",
-  center: [0, 0],
-  zoom: 1,
-  bounds: [
-    [22, 43],
-    [41.5, 53],
-  ],
+  // center: [0, 0],
+  // zoom: 1,
+  bounds: initBBox,
 });
 
 // add scale bar?
@@ -123,4 +125,15 @@ document.getElementById("toggleUCDP").addEventListener("change", (event) => {
   } else {
     map.setLayoutProperty("ucdp_events", "visibility", "none");
   }
+});
+
+// zoom buttons
+document.getElementById("zoomIn").addEventListener("click", (e) => {
+  map.zoomIn();
+});
+document.getElementById("zoomOut").addEventListener("click", (e) => {
+  map.zoomOut();
+});
+document.getElementById("zoomReset").addEventListener("click", (e) => {
+  map.easeTo(map.cameraForBounds(initBBox));
 });

@@ -16,25 +16,76 @@ label {
 .grid-container {
 	display: grid;
 	grid-template-rows: 1fr;
-	grid-template-columns: 1fr 250px;
+	grid-template-columns: 250px 1fr;
 	height: 100vh;
 	width: 100vw;
 	grid-template-rows: 100%;
 }
 
-#map {
-	grid-column: 1 / span 1;
+#map-container {
+	grid-column: 2 / span 1;
 	grid-row: 1 / span 1;
+	position: relative;
+}
+
+#map {
+	height: 100%;
+	width: 100%;
+}
+
+#zoomcontrols {
+	display: block;
+	position: absolute;
+	width: 450px;
+	height: 40px;
+	font-size: 15px;
+	line-height: 40px;
+	background-color: #fff;
+	bottom: 10px;
+	left: 0;
+	right: 0;
+	margin: 15px auto;
+	/*https://www.w3schools.com/csS/css3_shadows_box.asp*/
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	border-radius: 10px;
+	padding: 0 10px;
+	color: #323243;
+}
+
+#zoomcontrols * {
+	display: inline-block;
+	height: 100%;
+	font-size: 15px;
+}
+
+#zoomcontrols button {
+	background-color: #fff;
+	color: #323243;
+	border: 2px solid #cecece;
+	border-top: none;
+	border-bottom: none;
+	padding: 0 15px;
+}
+
+#zoomcontrols button:hover {
+	background-color: #eee;
+}
+
+#zoomIn,
+#zoomOut {
+	margin-right: -2px;
 }
 
 #sidebar {
-	grid-column: 2 / span 1;
+	grid-column: 1 / span 1;
 	grid-row: 1 / span 1;
-	background-color: #eee;
+	background-color: #fff;
 	padding: 10px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	z-index: 999; /*for shadow to show up*/
 }
 
-#loading-message {
+/*#loading-message {
 	display: block;
 	position: absolute;
 	margin: auto;
@@ -51,7 +102,7 @@ label {
 	padding: 45px;
 
 	text-align: center;
-}
+}*/
 
 .legend {
 	margin-left: 20px;
