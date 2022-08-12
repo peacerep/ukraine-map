@@ -62,8 +62,34 @@ let colorScheme = {
   });
 });
 
-// // remove loading message when data is loaded
-d3.select("#loading-message").attr("class", "hidden");
+// add zoom to feature
+d3.json("data/ukraine_bounds.json").then(function (data) {
+  // get zoom options dropdown and add all admin regions as options
+  let zoom_options = d3.select("#selectZoomTo");
+  zoom_options.append("optgroup").attr("label", "Administrative Regions");
+  zoom_options
+    .selectAll(".oblast")
+    .data(data)
+    .enter()
+    .append("option")
+    .attr("class", "oblast")
+    .attr("value", (d) => d.name_en)
+    .html((d) => d.name_en);
+
+  // listen for changes to dropdown + trigger zoom
+  zoom_options.on("change", function () {
+    // get selected option
+    let select = document.getElementById("selectZoomTo");
+    let zoomTo = select.options[select.selectedIndex].value;
+
+    // get bounds and zoom map to bounds
+    map.easeTo(
+      map.cameraForBounds(data.find((d) => d.name_en === zoomTo).bounds)
+    );
+    // reset dropdown value after 1s
+    setTimeout(() => (select.options[0].selected = true), 1000);
+  });
+});
 
 map.on("load", function () {
   map.addSource("acled", {

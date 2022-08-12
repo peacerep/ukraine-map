@@ -58,6 +58,10 @@ label {
 	font-size: 15px;
 }
 
+#zoomcontrols select {
+	width: 135px;
+}
+
 #zoomcontrols button {
 	background-color: #fff;
 	color: #323243;
