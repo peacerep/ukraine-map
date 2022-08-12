@@ -1,8 +1,13 @@
 "use strict";
 
 const initBBox = [
-  [22, 43],
-  [41.5, 53],
+  [21.2, 42.9], // [west, south]
+  [41.5, 52.75], // [east, north]
+];
+
+const maxBounds = [
+  [initBBox[0][0] - 15, initBBox[0][1] - 10],
+  [initBBox[1][0] + 15, initBBox[1][1] + 10],
 ];
 
 var map = new maplibregl.Map({
@@ -12,7 +17,11 @@ var map = new maplibregl.Map({
   // center: [0, 0],
   // zoom: 1,
   bounds: initBBox,
+  maxBounds: maxBounds,
 });
+
+const minZoom = map.getZoom() - 1;
+map.setMinZoom(minZoom);
 
 // add scale bar?
 
