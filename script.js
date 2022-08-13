@@ -11,6 +11,7 @@ const maxBounds = [
   [initBBox[1][0] + 15, initBBox[1][1] + 10],
 ];
 
+// initialise map
 var map = new maplibregl.Map({
   container: "map",
   style:
@@ -24,6 +25,8 @@ const minZoom = map.getZoom() - 1;
 map.setMinZoom(minZoom);
 
 // add scale bar?
+
+const layers = ["acled", "ucdp"];
 
 // color schemes for all datasets
 let colorScheme = {
@@ -45,7 +48,7 @@ let colorScheme = {
 };
 
 // add legends
-["acled", "ucdp"].forEach(function (dataset) {
+layers.forEach(function (dataset) {
   let legend = d3
     .select(`#${dataset}_legend`)
     .selectAll("label")
@@ -54,23 +57,17 @@ let colorScheme = {
     .append("label")
     .attr("class", "checkbox-container")
     .html((d) => d[0]);
-  legend.append("input").attr("type", "checkbox").property("checked", true);
+  legend
+    .append("input")
+    .attr("type", "checkbox")
+    .attr("class", "filterInput")
+    .attr("id", (d) => `filter_${dataset}_${d[0]}`)
+    .attr("name", (d) => d[0])
+    .property("checked", true);
   legend
     .append("span")
     .attr("class", "checkmark")
     .style("background-color", (d) => d[1]);
-  // legend
-  //   .append("td")
-  //   .attr("class", "legendLabel")
-  //   .html((d) => d[0]);
-
-  legend.on("click", function () {
-    if (d3.select(this).classed("disabled")) {
-      d3.select(this).classed("disabled", false);
-    } else {
-      d3.select(this).classed("disabled", true);
-    }
-  });
 });
 
 // add zoom to region feature
@@ -147,21 +144,71 @@ map.on("load", function () {
   });
 });
 
-// checkboxes to toggle layers on and off
-document.getElementById("toggleACLED").addEventListener("change", (event) => {
-  if (event.currentTarget.checked) {
-    map.setLayoutProperty("acled_events", "visibility", "visible");
-  } else {
-    map.setLayoutProperty("acled_events", "visibility", "none");
-  }
+// FILTERS + LAYER TOGGLES
+
+// listen for changes on all filter input elements
+// using a class .filterInput here to ensure input elements elsewhere
+// on the page do not trigger filter updates (performance)
+document.querySelectorAll(".filterInput").forEach((el) => {
+  el.addEventListener("change", (e) => {
+    // show/hide data layers
+    layers.forEach((layer) => {
+      if (document.getElementById(`toggle-${layer}`).checked) {
+        map.setLayoutProperty(`${layer}_events`, "visibility", "visible");
+        // update filters for visible layers
+        updateFilters(layer);
+      } else {
+        // hide unchecked layers, no need to update until checked again
+        map.setLayoutProperty(`${layer}_events`, "visibility", "none");
+      }
+    });
+  });
 });
-document.getElementById("toggleUCDP").addEventListener("change", (event) => {
-  if (event.currentTarget.checked) {
-    map.setLayoutProperty("ucdp_events", "visibility", "visible");
+
+function updateFilters(layer) {
+  if (layer === "ucdp" || layer === "acled") {
+    // set variable
+    let varName = layer === "ucdp" ? "type_of_violence" : "event_type";
+
+    // get list of checked layers
+    let allNodes = document
+      .getElementById(layer + "_legend")
+      .querySelectorAll("input[type=checkbox]");
+    let checkedNodes = document
+      .getElementById(layer + "_legend")
+      .querySelectorAll("input[type=checkbox]:checked");
+    let checkedTypes = Array.from(checkedNodes).map(
+      (d) => d.attributes.name.value
+    );
+
+    // set filter accordingly
+    if (checkedNodes.length === allNodes.length) {
+      // remove filter if all are checked
+      map.setFilter(layer + "_events", null);
+    } else {
+      // otherwise filter for checked items only
+      map.setFilter(layer + "_events", [
+        "in",
+        ["to-string", ["get", varName]],
+        ["literal", checkedTypes],
+      ]);
+    }
   } else {
-    map.setLayoutProperty("ucdp_events", "visibility", "none");
+    console.log("error - filters not implemented for layer: ", layer);
   }
-});
+}
+
+function resetFilters() {
+  // get list of all filter input checkboxes
+  let filters = document.querySelectorAll(".filterInput");
+  // check all of them
+  // needs updating if we want an initial state other than having everything checked
+  filters.forEach((el) => {
+    el.checked = true;
+  });
+  // dispatch a single change event to make the map update
+  filters[0].dispatchEvent(new Event("change"));
+}
 
 // zoom buttons
 document.getElementById("zoomIn").addEventListener("click", (e) => {
