@@ -142,6 +142,11 @@ map.on("load", function () {
       "circle-radius": 4,
     },
   });
+
+  // wait for data to load, then remove loading message
+  waitFor(() => layers.map((l) => map.isSourceLoaded(l)).every((v) => v)).then(
+    () => (document.getElementById("loading-message").style.display = "none")
+  );
 });
 
 // FILTERS + LAYER TOGGLES
@@ -220,3 +225,12 @@ document.getElementById("zoomOut").addEventListener("click", (e) => {
 document.getElementById("zoomReset").addEventListener("click", (e) => {
   map.easeTo(map.cameraForBounds(initBBox));
 });
+
+// https://stackoverflow.com/questions/7193238/wait-until-a-condition-is-true
+function waitFor(conditionFunction) {
+  const poll = (resolve) => {
+    if (conditionFunction()) resolve();
+    else setTimeout((_) => poll(resolve), 100);
+  };
+  return new Promise(poll);
+}
