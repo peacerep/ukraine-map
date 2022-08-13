@@ -9,10 +9,6 @@ h1 {
 	margin: 5px 0 10px 0;
 }
 
-label {
-	padding: 5px;
-}
-
 .grid-container {
 	display: grid;
 	grid-template-rows: 1fr;
@@ -91,40 +87,70 @@ label {
 	z-index: 999; /*for shadow to show up*/
 }
 
-.legend {
-	margin-left: 20px;
+/* CHECKBOXES DATASETS*/
+.labelDataset {
+	padding: 10px 0 2px 20px;
+	margin: 3px 0;
+	width: 100%;
+	display: inline-block;
+	border-top: 2px solid #ccc;
+	font-weight: bold;
 }
-.legendItem {
+.labelDataset input {
+	position: absolute;
+	left: 12px;
+}
+
+/* CHECKBOXES LEGENDS */
+
+/* style checkbox container (label element) */
+.checkbox-container {
+	display: block;
+	position: relative;
+	padding: 4px 4px 4px 20px;
 	cursor: pointer;
 	user-select: none;
 }
-.legendItem:hover .legendLabel {
-	text-decoration: underline;
+/* hide default checkbox */
+.checkbox-container input {
+	position: absolute;
+	opacity: 0;
+	cursor: pointer;
+	height: 0;
+	width: 0;
 }
-.legendCircle {
+/* create circles as checkboxes */
+.checkmark {
+	position: absolute;
+	top: 4px;
+	left: 0;
 	width: 12px;
 	height: 12px;
 	border-radius: 6px;
-	display: inline-block;
 	margin: 0 3px;
 }
-
-.disabled .legendCircle {
+/* color circle grey when not checked */
+.checkbox-container input:not(:checked) ~ .checkmark {
 	background-color: grey !important;
 }
-.disabled .legendCircle::after {
+/* add diagonal line */
+.checkbox-container .checkmark::after {
 	content: "";
 	position: absolute;
+	display: block;
 	border-bottom: 2px solid #323243;
 	width: 20px;
 	transform: rotate(-45deg);
 	transform-origin: 0% 100%;
 	height: 12px;
 }
-
-.legendLabel {
-	display: inline-block;
-	padding: 3px;
+/* hide diagonal line when checked */
+.checkbox-container input:checked ~ .checkmark:after {
+	display: none;
+}
+/* underline on hover */
+.checkbox-container:hover {
+	text-decoration: underline;
 }
 
 .hidden {

@@ -48,20 +48,21 @@ let colorScheme = {
 ["acled", "ucdp"].forEach(function (dataset) {
   let legend = d3
     .select(`#${dataset}_legend`)
-    .selectAll("tr")
+    .selectAll("label")
     .data(colorScheme[dataset])
     .enter()
-    .append("tr")
-    .attr("class", "legendItem");
-  legend
-    .append("td")
-    .append("div")
-    .attr("class", "legendCircle")
-    .style("background-color", (d) => d[1]);
-  legend
-    .append("td")
-    .attr("class", "legendLabel")
+    .append("label")
+    .attr("class", "checkbox-container")
     .html((d) => d[0]);
+  legend.append("input").attr("type", "checkbox").property("checked", true);
+  legend
+    .append("span")
+    .attr("class", "checkmark")
+    .style("background-color", (d) => d[1]);
+  // legend
+  //   .append("td")
+  //   .attr("class", "legendLabel")
+  //   .html((d) => d[0]);
 
   legend.on("click", function () {
     if (d3.select(this).classed("disabled")) {

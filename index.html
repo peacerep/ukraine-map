@@ -61,20 +61,24 @@
 			</div>
 			<div id="sidebar">
 				<h1>Filters</h1>
-				<input
-					type="checkbox"
-					name="ACLED"
-					id="toggleACLED"
-					checked
-				/><label for="ACLED">ACLED</label>
-				<table id="acled_legend" class="legend"></table>
-				<input
-					type="checkbox"
-					name="UCDP"
-					id="toggleUCDP"
-					checked
-				/><label for="UCDP">UCDP</label>
-				<table id="ucdp_legend" class="legend"></table>
+				<label for="toggleACLED" class="labelDataset"
+					><input
+						type="checkbox"
+						name="ACLED"
+						id="toggleACLED"
+						checked
+					/>ACLED</label
+				>
+				<div id="acled_legend" class="legend"></div>
+				<label for="toggleUCDP" class="labelDataset"
+					><input
+						type="checkbox"
+						name="UCDP"
+						id="toggleUCDP"
+						checked
+					/>UCDP</label
+				>
+				<div id="ucdp_legend" class="legend"></div>
 				<button>Reset all filters</button>
 			</div>
 		</div>
