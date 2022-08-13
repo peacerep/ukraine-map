@@ -5,6 +5,15 @@
 	font-family: sans-serif;
 }
 
+button {
+	background-color: #fff;
+	color: #323243;
+	border: 2px solid #cecece;
+}
+button:hover {
+	background-color: #eee;
+}
+
 h1 {
 	margin: 5px 0 10px 0;
 }
@@ -59,16 +68,9 @@ h1 {
 }
 
 #zoomcontrols button {
-	background-color: #fff;
-	color: #323243;
-	border: 2px solid #cecece;
 	border-top: none;
 	border-bottom: none;
 	padding: 0 15px;
-}
-
-#zoomcontrols button:hover {
-	background-color: #eee;
 }
 
 #zoomIn,
@@ -85,20 +87,40 @@ h1 {
 	padding: 10px;
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 	z-index: 999; /*for shadow to show up*/
+	position: relative; /*to position reset button*/
 }
 
 /* CHECKBOXES DATASETS*/
 .labelDataset {
-	padding: 10px 0 2px 20px;
-	margin: 3px 0;
-	width: 100%;
 	display: inline-block;
-	border-top: 2px solid #ccc;
 	font-weight: bold;
 }
 .labelDataset input {
 	position: absolute;
-	left: 12px;
+	left: 2px;
+}
+.layerHeader {
+	position: relative;
+	width: 100%;
+	border-top: 2px solid #ccc;
+	padding: 10px 0 2px 20px;
+	margin: 3px 0;
+}
+.infoButton {
+	display: block;
+	position: absolute;
+	right: 0;
+	top: 0;
+	margin: 5px 0;
+	width: 22px;
+	height: 22px;
+	border-radius: 11px;
+	line-height: 21px;
+	font-weight: bold;
+	cursor: pointer;
+}
+.infoButton:hover {
+	background-color: #eee;
 }
 
 /* CHECKBOXES LEGENDS */
@@ -148,9 +170,20 @@ h1 {
 .checkbox-container input:checked ~ .checkmark:after {
 	display: none;
 }
-/* underline on hover */
+/* highlight on hover */
 .checkbox-container:hover {
-	text-decoration: underline;
+	background-color: #eee;
+}
+
+button#resetFilters {
+	padding: 10px;
+	border-radius: 10px;
+	position: absolute;
+	left: 0;
+	right: 0;
+	margin: auto;
+	bottom: 10px;
+	width: 150px;
 }
 
 .hidden {
