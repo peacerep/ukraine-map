@@ -26,7 +26,7 @@ map.setMinZoom(minZoom);
 
 // add scale bar?
 
-const layers = ["acled", "ucdp"];
+const layers = ["acled", "ucdp", "epr", "powerplants"];
 
 // color schemes for all datasets
 let colorScheme = {
@@ -102,6 +102,9 @@ d3.json("data/ukraine_bounds.json").then(function (data) {
 Promise.all([
   d3.json("data/1900-01-01-2022-08-07-Ukraine.geojson"), // ACLED
   d3.json("data/ucdp_geojson.json"), // UCDP
+  d3.csv("data/global_power_plant_database_ukraine.csv"), // power plant locations
+  d3.csv("data/ukraine_power_plants_extra_info.csv"), // power plant additional data
+  d3.json("data/GeoEPR-2021-Ukraine.geojson"), // EPR ethnic makeup
 ]).then(function (data) {
   // modify data
   const acled = data[0];
@@ -114,6 +117,23 @@ Promise.all([
     d.properties.timestamp_start = new Date(d.properties.date_start).getTime();
     d.properties.timestamp_end = new Date(d.properties.date_end).getTime();
   });
+  const powerplants = data[2];
+  const powerplants2 = data[3];
+  console.log(powerplants);
+  const powerplants_geojson = {
+    type: "FeatureCollection",
+    features: powerplants.map(function (el) {
+      return {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [+el.longitude, +el.latitude],
+        },
+        properties: el,
+      };
+    }),
+  };
+  const epr = data[4];
 
   // when map is ready, add data sources + vis layers
   map.on("load", function () {
@@ -127,8 +147,29 @@ Promise.all([
       data: ucdp,
     });
 
+    map.addSource("epr", {
+      type: "geojson",
+      data: epr,
+    });
+
+    map.addSource("powerplants", {
+      type: "geojson",
+      data: powerplants_geojson,
+    });
+
     map.addLayer({
-      id: "acled_events",
+      id: "epr_layer",
+      type: "fill",
+      source: "epr",
+      paint: {
+        "fill-color": "#fff",
+        "fill-opacity": 0.3,
+        "fill-outline-color": "#000",
+      },
+    });
+
+    map.addLayer({
+      id: "acled_layer",
       type: "circle",
       source: "acled",
       paint: {
@@ -144,7 +185,7 @@ Promise.all([
     });
 
     map.addLayer({
-      id: "ucdp_events",
+      id: "ucdp_layer",
       type: "circle",
       source: "ucdp",
       paint: {
@@ -156,6 +197,17 @@ Promise.all([
         ],
         "circle-opacity": 0.7,
         "circle-radius": 4,
+      },
+    });
+
+    map.addLayer({
+      id: "powerplants_layer",
+      type: "circle",
+      source: "powerplants",
+      paint: {
+        "circle-color": "#000",
+        "circle-opacity": 1,
+        "circle-radius": 6,
       },
     });
 
@@ -178,12 +230,12 @@ document.querySelectorAll(".filterInput").forEach((el) => {
     // show/hide data layers
     layers.forEach((layer) => {
       if (document.getElementById(`toggle-${layer}`).checked) {
-        map.setLayoutProperty(`${layer}_events`, "visibility", "visible");
+        map.setLayoutProperty(`${layer}_layer`, "visibility", "visible");
         // update filters for visible layers
         updateFilters(layer);
       } else {
         // hide unchecked layers, no need to update until checked again
-        map.setLayoutProperty(`${layer}_events`, "visibility", "none");
+        map.setLayoutProperty(`${layer}_layer`, "visibility", "none");
       }
     });
   });
@@ -248,7 +300,9 @@ function updateFilters(layer) {
 
     // combine + set filters
     let filters = ["all", categoryFilter, minDateFilter, maxDateFilter];
-    map.setFilter(layer + "_events", filters);
+    map.setFilter(layer + "_layer", filters);
+  } else if (layer === "epr") {
+    // no error but no filters either
   } else {
     console.log("error - filters not implemented for layer: ", layer);
   }
