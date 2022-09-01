@@ -99,54 +99,73 @@ d3.json("data/ukraine_bounds.json").then(function (data) {
   });
 });
 
-// when map is ready, add data sources + vis layers
-map.on("load", function () {
-  map.addSource("acled", {
-    type: "geojson",
-    data: "data/1900-01-01-2022-08-07-Ukraine.geojson",
+Promise.all([
+  d3.json("data/1900-01-01-2022-08-07-Ukraine.geojson"), // ACLED
+  d3.json("data/ucdp_geojson.json"), // UCDP
+]).then(function (data) {
+  // modify data
+  const acled = data[0];
+  acled.features.forEach(function (d) {
+    d.properties.timestamp_start = new Date(d.properties.event_date).getTime();
+    d.properties.timestamp_end = new Date(d.properties.event_date).getTime();
+  });
+  const ucdp = data[1];
+  ucdp.features.forEach(function (d) {
+    d.properties.timestamp_start = new Date(d.properties.date_start).getTime();
+    d.properties.timestamp_end = new Date(d.properties.date_end).getTime();
   });
 
-  map.addSource("ucdp", {
-    type: "geojson",
-    data: "data/ucdp_geojson.json",
-  });
+  // when map is ready, add data sources + vis layers
+  map.on("load", function () {
+    map.addSource("acled", {
+      type: "geojson",
+      data: acled,
+    });
 
-  map.addLayer({
-    id: "acled_events",
-    type: "circle",
-    source: "acled",
-    paint: {
-      "circle-color": [
-        "match",
-        ["get", "event_type"],
-        ...colorScheme.acled.flat(),
-        d3.schemeTableau10[9], // grey for missing types
-      ],
-      "circle-opacity": 0.7,
-      "circle-radius": 4,
-    },
-  });
+    map.addSource("ucdp", {
+      type: "geojson",
+      data: ucdp,
+    });
 
-  map.addLayer({
-    id: "ucdp_events",
-    type: "circle",
-    source: "ucdp",
-    paint: {
-      "circle-color": [
-        "match",
-        ["get", "type_of_violence"],
-        ...colorScheme.ucdp.flat(),
-        d3.schemeTableau10[9], // grey for missing types
-      ],
-      "circle-opacity": 0.7,
-      "circle-radius": 4,
-    },
-  });
+    map.addLayer({
+      id: "acled_events",
+      type: "circle",
+      source: "acled",
+      paint: {
+        "circle-color": [
+          "match",
+          ["get", "event_type"],
+          ...colorScheme.acled.flat(),
+          d3.schemeTableau10[9], // grey for missing types
+        ],
+        "circle-opacity": 0.7,
+        "circle-radius": 4,
+      },
+    });
 
-  // wait for data to load, then remove loading message
-  waitFor(() => layers.map((l) => map.isSourceLoaded(l)).every((v) => v)).then(
-    () => (document.getElementById("loading-message").style.display = "none")
-  );
+    map.addLayer({
+      id: "ucdp_events",
+      type: "circle",
+      source: "ucdp",
+      paint: {
+        "circle-color": [
+          "match",
+          ["get", "type_of_violence"],
+          ...colorScheme.ucdp.flat(),
+          d3.schemeTableau10[9], // grey for missing types
+        ],
+        "circle-opacity": 0.7,
+        "circle-radius": 4,
+      },
+    });
+
+    // wait for data to load, then remove loading message
+    waitFor(() =>
+      layers.map((l) => map.isSourceLoaded(l)).every((v) => v)
+    ).then(
+      () => (document.getElementById("loading-message").style.display = "none")
+    );
+  });
 });
 
 // FILTERS + LAYER TOGGLES
@@ -172,8 +191,41 @@ document.querySelectorAll(".filterInput").forEach((el) => {
 
 function updateFilters(layer) {
   if (layer === "ucdp" || layer === "acled") {
-    // set variable
-    let varName = layer === "ucdp" ? "type_of_violence" : "event_type";
+    // set variables
+    let varName;
+    switch (layer) {
+      case "ucdp":
+        varName = "type_of_violence";
+        break;
+      case "acled":
+        varName = "event_type";
+        break;
+      default:
+      //
+    }
+
+    // get time span
+    // using time stamps bc maplibre does not support date objects
+    let minDate = getDate("min-date");
+    let maxDate = getDate("max-date");
+    function getDate(id) {
+      let d = document.getElementById(id).value;
+      if (d === "") {
+        return null;
+      } else {
+        console.log(id, new Date(d).getTime());
+        return new Date(d).getTime();
+      }
+    }
+
+    let minDateFilter =
+      minDate === null ? true : [">=", ["number", ["get", "endDate"]], minDate];
+    let maxDateFilter =
+      maxDate === null
+        ? true
+        : ["<=", ["number", ["get", "startDate"]], maxDate];
+    console.log(minDateFilter, maxDateFilter);
+    // console.log(minDate, maxDate);
 
     // get list of checked layers
     let allNodes = document
@@ -186,18 +238,17 @@ function updateFilters(layer) {
       (d) => d.attributes.name.value
     );
 
-    // set filter accordingly
-    if (checkedNodes.length === allNodes.length) {
-      // remove filter if all are checked
-      map.setFilter(layer + "_events", null);
-    } else {
-      // otherwise filter for checked items only
-      map.setFilter(layer + "_events", [
-        "in",
-        ["to-string", ["get", varName]],
-        ["literal", checkedTypes],
-      ]);
-    }
+    // set category filter accordingly
+    let categoryFilter =
+      checkedNodes.length === allNodes.length
+        ? // remove filter if all are checked
+          true
+        : // otherwise filter for checked items only
+          ["in", ["to-string", ["get", varName]], ["literal", checkedTypes]];
+
+    // combine + set filters
+    let filters = ["all", categoryFilter, minDateFilter, maxDateFilter];
+    map.setFilter(layer + "_events", filters);
   } else {
     console.log("error - filters not implemented for layer: ", layer);
   }
@@ -211,6 +262,9 @@ function resetFilters() {
   filters.forEach((el) => {
     el.checked = true;
   });
+  // reset date inputs
+  document.getElementById("min-date").value = "";
+  document.getElementById("max-date").value = "";
   // dispatch a single change event to make the map update
   filters[0].dispatchEvent(new Event("change"));
 }
