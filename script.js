@@ -18,6 +18,7 @@ var map = new maplibregl.Map({
     "https://api.maptiler.com/maps/bright/style.json?key=29pOogG422DKpW4WspFu",
   bounds: initBBox,
   maxBounds: maxBounds,
+  preserveDrawingBuffer: true,
 });
 
 // set min zoom to be one less than the zoom calculated to fit the bbox
@@ -333,6 +334,17 @@ document.getElementById("zoomOut").addEventListener("click", (e) => {
 document.getElementById("zoomReset").addEventListener("click", (e) => {
   map.easeTo(map.cameraForBounds(initBBox));
 });
+
+function captureScreenshot() {
+  // download image
+  // https://stackoverflow.com/questions/3906142/how-to-save-a-png-from-javascript-variable
+  var download = document.createElement("a");
+  download.href = map.getCanvas().toDataURL();
+  download.download = "screenshot.png";
+  download.click();
+  // to open image in new tab (requires popup permission) instead:
+  // window.open(map.getCanvas().toDataURL());
+}
 
 // https://stackoverflow.com/questions/7193238/wait-until-a-condition-is-true
 function waitFor(conditionFunction) {

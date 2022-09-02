@@ -193,15 +193,20 @@ h1 {
 	background-color: #eee;
 }
 
+button#captureScreenshot,
 button#resetFilters {
 	padding: 10px;
 	border-radius: 10px;
+}
+button#resetFilters {
 	position: absolute;
 	left: 0;
 	right: 0;
 	margin: auto;
 	bottom: 10px;
 	width: 150px;
+}
+button#captureScreenshot {
 }
 
 .hidden {
