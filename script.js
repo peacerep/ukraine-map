@@ -29,6 +29,35 @@ map.setMinZoom(minZoom);
 
 const layers = ["acled", "ucdp", "epr", "powerplants"];
 
+const layersInfo = {
+  acled: "info",
+  ucdp: "info",
+  epr: "info",
+  powerplants: "info",
+};
+
+// add info boxes
+layers.forEach((layer) => {
+  // create hidden info box
+  d3.select("#" + layer + "-header")
+    .append("div")
+    .attr("class", "infoBox")
+    .attr("id", layer + "-info-box")
+    .html(layersInfo[layer])
+    .classed("hidden", true)
+    .append("span")
+    .attr("class", "closebtn")
+    .html("&times;")
+    .on("click", () =>
+      d3.select("#" + layer + "-info-box").classed("hidden", true)
+    );
+  d3.select("#" + layer + "-info").on("click", () => {
+    console.log("!");
+    // show popup
+    d3.select("#" + layer + "-info-box").classed("hidden", false);
+  });
+});
+
 // color schemes for all datasets
 let colorScheme = {
   // ACLED event_type color scheme
@@ -291,11 +320,13 @@ function updateFilters(layer) {
     }
 
     let minDateFilter =
-      minDate === null ? true : [">=", ["number", ["get", "endDate"]], minDate];
+      minDate === null
+        ? true
+        : [">=", ["number", ["get", "timestamp_end"]], minDate];
     let maxDateFilter =
       maxDate === null
         ? true
-        : ["<=", ["number", ["get", "startDate"]], maxDate];
+        : ["<=", ["number", ["get", "timestamp_start"]], maxDate];
     console.log(minDateFilter, maxDateFilter);
     // console.log(minDate, maxDate);
 

@@ -46,10 +46,13 @@ h1 {
 	font-size: 15px;
 	line-height: 40px;
 	background-color: #fff;
-	bottom: 10px;
+	top: 0;
+	right: 0;
+	margin: 10px;
+	/*	bottom: 10px;
 	left: 0;
 	right: 0;
-	margin: 15px auto;
+	margin: 15px auto;*/
 	/*https://www.w3schools.com/csS/css3_shadows_box.asp*/
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 	border-radius: 10px;
@@ -121,7 +124,7 @@ h1 {
 	position: relative;
 	width: 100%;
 	border-top: 2px solid #ccc;
-	padding: 10px 0 2px 20px;
+	padding: 10px 0 2px 0;
 	margin: 3px 0;
 }
 .infoButton {
@@ -207,6 +210,22 @@ button#resetFilters {
 	width: 150px;
 }
 button#captureScreenshot {
+}
+
+.infoBox {
+	border: 1px solid #b2b0bb;
+	border-radius: 5px;
+	padding: 3px;
+	margin: 8px 0 3px 0;
+	background-color: #f8f5f1;
+}
+.closebtn {
+	float: right;
+	cursor: pointer;
+	color: #666;
+}
+.closebtn:hover {
+	font-weight: bold;
 }
 
 .hidden {
