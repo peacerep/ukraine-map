@@ -201,15 +201,26 @@ Promise.all([
       },
     });
 
-    map.addLayer({
-      id: "powerplants_layer",
-      type: "circle",
-      source: "powerplants",
-      paint: {
-        "circle-color": "#000",
-        "circle-opacity": 1,
-        "circle-radius": 6,
-      },
+    map.loadImage("img/symbol_power.png", (error, img1) => {
+      map.loadImage("img/symbol_nuclear.png", (error, img2) => {
+        map.addImage("symbol_power", img1);
+        map.addImage("symbol_nuclear", img2);
+
+        map.addLayer({
+          id: "powerplants_layer",
+          type: "symbol",
+          source: "powerplants",
+          layout: {
+            "icon-image": [
+              "case",
+              ["==", ["get", "primary_fuel"], "Nuclear"],
+              "symbol_nuclear",
+              "symbol_power",
+            ],
+            "icon-size": 0.5,
+          },
+        });
+      });
     });
 
     // wait for data to load, then remove loading message
@@ -304,6 +315,18 @@ function updateFilters(layer) {
     map.setFilter(layer + "_layer", filters);
   } else if (layer === "epr") {
     // no error but no filters either
+  } else if (layer === "powerplants") {
+    // no time filter
+    // check if all or nuclear only
+    if (document.getElementById("toggle-nuclear-only").checked) {
+      map.setFilter("powerplants_layer", [
+        "==",
+        ["get", "primary_fuel"],
+        "Nuclear",
+      ]);
+    } else {
+      map.setFilter("powerplants_layer", true);
+    }
   } else {
     console.log("error - filters not implemented for layer: ", layer);
   }
