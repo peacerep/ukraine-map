@@ -47,6 +47,13 @@ let colorScheme = {
     [3, d3.schemeTableau10[8]],
   ],
 };
+let legendLabels = {
+  acled: (d) => d,
+  ucdp: (d) =>
+    ["State-Based Conflict", "Non-State Conflict", "One-Sided Violence"][
+      +d - 1
+    ],
+};
 
 // add legends
 layers.forEach(function (dataset) {
@@ -57,7 +64,7 @@ layers.forEach(function (dataset) {
     .enter()
     .append("label")
     .attr("class", "checkbox-container")
-    .html((d) => d[0]);
+    .html((d) => legendLabels[dataset](d[0]));
   legend
     .append("input")
     .attr("type", "checkbox")
@@ -226,9 +233,10 @@ Promise.all([
     // wait for data to load, then remove loading message
     waitFor(() =>
       layers.map((l) => map.isSourceLoaded(l)).every((v) => v)
-    ).then(
-      () => (document.getElementById("loading-message").style.display = "none")
-    );
+    ).then(() => {
+      document.getElementById("loading-message").style.display = "none";
+      resetFilters();
+    });
   });
 });
 
@@ -340,6 +348,9 @@ function resetFilters() {
   filters.forEach((el) => {
     el.checked = true;
   });
+  // uncheck the ones that need to be unchecked instead
+  document.getElementById("toggle-epr").checked = false;
+  document.getElementById("toggle-nuclear-only").checked = false;
   // reset date inputs
   document.getElementById("min-date").value = "";
   document.getElementById("max-date").value = "";
