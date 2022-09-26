@@ -27,7 +27,7 @@ map.setMinZoom(minZoom);
 
 // add scale bar?
 
-const layers = ["acled", "ucdp", "epr", "powerplants"];
+const layers = ["acled", "ucdp", "epr", "powerplants", "hc"];
 
 const layersInfo = {
   acled:
@@ -55,7 +55,6 @@ layers.forEach((layer) => {
       d3.select("#" + layer + "-info-box").classed("hidden", true)
     );
   d3.select("#" + layer + "-info").on("click", () => {
-    console.log("!");
     // show popup
     d3.select("#" + layer + "-info-box").classed("hidden", false);
   });
@@ -145,6 +144,7 @@ Promise.all([
   d3.csv("data/global_power_plant_database_ukraine.csv"), // power plant locations
   d3.csv("data/ukraine_power_plants_extra_info.csv"), // power plant additional data
   d3.json("data/GeoEPR-2021-Ukraine.geojson"), // EPR ethnic makeup
+  d3.csv("data/Humanitarian Corridors_ Ukraine - HC_geocoded.csv"), // humanitarian corridors
 ]).then(function (data) {
   // modify data
   const acled = data[0];
@@ -174,6 +174,23 @@ Promise.all([
     }),
   };
   const epr = data[4];
+  const hc = data[5];
+  const hc_geojson = {
+    type: "FeatureCollection",
+    features: hc.map(function (el) {
+      return {
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [+el.from_longitude, +el.from_latitude],
+            [+el.to_longitude, +el.to_latitude],
+          ],
+        },
+        properties: el,
+      };
+    }),
+  };
 
   // when map is ready, add data sources + vis layers
   map.on("load", function () {
@@ -195,6 +212,11 @@ Promise.all([
     map.addSource("powerplants", {
       type: "geojson",
       data: powerplants_geojson,
+    });
+
+    map.addSource("hc", {
+      type: "geojson",
+      data: hc_geojson,
     });
 
     map.addLayer({
@@ -262,6 +284,43 @@ Promise.all([
       });
     });
 
+    map.addLayer({
+      id: "hc_layer",
+      type: "line",
+      source: "hc",
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+      },
+      paint: {
+        "line-color": "#333",
+        "line-width": 1,
+      },
+    });
+
+    map.loadImage("img/arrow.png", function (err, image) {
+      if (err) {
+        console.error("err image", err);
+        return;
+      }
+      map.addImage("arrow", image);
+      map.addLayer({
+        id: "hc_arrow_layer",
+        type: "symbol",
+        source: "hc",
+        paint: { "icon-color": "#333" },
+        layout: {
+          "symbol-placement": "line",
+          "symbol-spacing": 100,
+          // "icon-allow-overlap": true,
+          // 'icon-ignore-placement': true,
+          "icon-image": "arrow",
+          "icon-size": 0.3,
+          visibility: "visible",
+        },
+      });
+    });
+
     // wait for data to load, then remove loading message
     waitFor(() =>
       layers.map((l) => map.isSourceLoaded(l)).every((v) => v)
@@ -283,11 +342,17 @@ document.querySelectorAll(".filterInput").forEach((el) => {
     layers.forEach((layer) => {
       if (document.getElementById(`toggle-${layer}`).checked) {
         map.setLayoutProperty(`${layer}_layer`, "visibility", "visible");
+        if (layer === "hc") {
+          map.setLayoutProperty(`hc_arrow_layer`, "visibility", "visible");
+        }
         // update filters for visible layers
         updateFilters(layer);
       } else {
         // hide unchecked layers, no need to update until checked again
         map.setLayoutProperty(`${layer}_layer`, "visibility", "none");
+        if (layer === "hc") {
+          map.setLayoutProperty(`hc_arrow_layer`, "visibility", "none");
+        }
       }
     });
   });
@@ -330,8 +395,6 @@ function updateFilters(layer) {
       maxDate === null
         ? true
         : ["<=", ["number", ["get", "timestamp_start"]], maxDate];
-    console.log(minDateFilter, maxDateFilter);
-    // console.log(minDate, maxDate);
 
     // get list of checked layers
     let allNodes = document
@@ -378,13 +441,15 @@ function resetFilters() {
   // get list of all filter input checkboxes
   let filters = document.querySelectorAll(".filterInput");
   // check all of them
-  // needs updating if we want an initial state other than having everything checked
   filters.forEach((el) => {
     el.checked = true;
   });
+
   // uncheck the ones that need to be unchecked instead
   document.getElementById("toggle-epr").checked = false;
-  document.getElementById("toggle-nuclear-only").checked = false;
+  // document.getElementById("toggle-nuclear-only").checked = false;
+  document.getElementById("toggle-hc").checked = false;
+
   // reset date inputs
   document.getElementById("min-date").value = "";
   document.getElementById("max-date").value = "";
