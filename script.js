@@ -30,10 +30,13 @@ map.setMinZoom(minZoom);
 const layers = ["acled", "ucdp", "epr", "powerplants"];
 
 const layersInfo = {
-  acled: "info",
-  ucdp: "info",
-  epr: "info",
-  powerplants: "info",
+  acled:
+    'ACLED (Armed Conflict Location & Event Data Project), downloaded via the <a href="https://acleddata.com/data-export-tool/" target="_blank">ACLED data export tool</a> (filtered for Ukraine only)<br><a href="https://acleddata.com/dashboard/" target="_blank">ACLED Dashboard</a><br><a href="https://acleddata.com/download/2827/" target="_blank">Codebook</a><br>Time period covered by data: 2018-01-01 – present<br>Last updated: 2022-08-07',
+  ucdp: 'UCDP Georeferenced Event Dataset (GED) Global version 22.1 via the <a href="https://ucdp.uu.se/apidocs/" target="_blank">UCDP API</a> (filtered for Ukraine only)<br><a href="https://ucdp.uu.se/" target="_blank">UCDP Dashboard</a><br><a href="https://ucdp.uu.se/downloads/ged/ged221.pdf" target="_blank">Codebook</a><br>Time period covered by data: 1989-01-01 – 2021-12- 31',
+  epr: '<a href="https://icr.ethz.ch/data/epr/geoepr/" target="_blank">GeoEPR 2021 dataset</a><br><a href="https://icr.ethz.ch/data/epr/geoepr/EPR_2021_Codebook_GeoEPR.pdf" target="_blank">Codebook</a><br>Time period covered by data: 1946 – 2021<br>Release date: 2021-06-08',
+  powerplants:
+    '<a href="https://datasets.wri.org/dataset/globalpowerplantdatabase" target="_blank">Global Power Plant Database v1.3.0</a><br>Release date: 2021-06-02<br>Additional data on nuclear power plants <a href="https://www.oecd-nea.org/jcms/pl_66130/ukraine-current-status-of-nuclear-power-installations" target="_blank">via OECD</a> (last updated: 2022-08-19)',
+  hc: "Data from research by PeaceRep and partners<br>Time period covered by data: 2022-03-05 – 2022-05-04<br>Last updated: 2022-05",
 };
 
 // add info boxes
