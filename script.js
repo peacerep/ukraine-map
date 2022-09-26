@@ -272,6 +272,7 @@ Promise.all([
           type: "symbol",
           source: "powerplants",
           layout: {
+            "icon-allow-overlap": true,
             "icon-image": [
               "case",
               ["==", ["get", "primary_fuel"], "Nuclear"],
@@ -279,6 +280,12 @@ Promise.all([
               "symbol_power",
             ],
             "icon-size": 0.5,
+            "symbol-sort-key": [
+              "case",
+              ["==", ["get", "primary_fuel"], "Nuclear"],
+              1,
+              0,
+            ],
           },
         });
       });
