@@ -159,7 +159,24 @@ Promise.all([
   });
   const powerplants = data[2];
   const powerplants2 = data[3];
-  console.log(powerplants);
+  // console.log(powerplants, powerplants2);
+
+  powerplants2.forEach((el) => {
+    if (el.dataset === "Global Power Plant Database") {
+      // find entry in powerplants db and add info
+      let index = powerplants.findIndex((d) => d.gppd_idnr === el.gppd_idnr);
+      powerplants[index].add_data = el;
+    } else {
+      powerplants.push({
+        longitude: el.longitude,
+        latitude: el.latitude,
+        primary_fuel: el.primary_fuel,
+        add_data: el,
+      });
+    }
+  });
+  console.log(powerplants, powerplants2);
+
   const powerplants_geojson = {
     type: "FeatureCollection",
     features: powerplants.map(function (el) {
@@ -173,6 +190,7 @@ Promise.all([
       };
     }),
   };
+
   const epr = data[4];
   const hc = data[5];
   const hc_geojson = {
@@ -264,29 +282,51 @@ Promise.all([
 
     map.loadImage("img/symbol_power.png", (error, img1) => {
       map.loadImage("img/symbol_nuclear.png", (error, img2) => {
-        map.addImage("symbol_power", img1);
-        map.addImage("symbol_nuclear", img2);
+        map.loadImage("img/symbol_nuclear_decom.png", (error, img3) => {
+          map.addImage("symbol_power", img1);
+          map.addImage("symbol_nuclear", img2);
+          map.addImage("symbol_nuclear_decom", img3);
 
-        map.addLayer({
-          id: "powerplants_layer",
-          type: "symbol",
-          source: "powerplants",
-          layout: {
-            "icon-allow-overlap": true,
-            "icon-image": [
-              "case",
-              ["==", ["get", "primary_fuel"], "Nuclear"],
-              "symbol_nuclear",
-              "symbol_power",
-            ],
-            "icon-size": 0.5,
-            "symbol-sort-key": [
-              "case",
-              ["==", ["get", "primary_fuel"], "Nuclear"],
-              1,
-              0,
-            ],
-          },
+          // Nuclear (undergoing decommissioning)
+
+          map.addLayer({
+            id: "powerplants_layer",
+            type: "symbol",
+            source: "powerplants",
+            layout: {
+              "icon-allow-overlap": true,
+              "icon-image": [
+                "case",
+                ["==", ["get", "primary_fuel"], "Nuclear"],
+                "symbol_nuclear",
+                [
+                  "case",
+                  [
+                    "==",
+                    ["get", "primary_fuel"],
+                    "Nuclear (undergoing decommissioning)",
+                  ],
+                  "symbol_nuclear_decom",
+                  "symbol_power",
+                ],
+              ],
+              "icon-size": 0.5,
+              "symbol-sort-key": [
+                "case",
+                [
+                  "any",
+                  ["==", ["get", "primary_fuel"], "Nuclear"],
+                  [
+                    "==",
+                    ["get", "primary_fuel"],
+                    "Nuclear (undergoing decommissioning)",
+                  ],
+                ],
+                1,
+                0,
+              ],
+            },
+          });
         });
       });
     });
@@ -432,9 +472,9 @@ function updateFilters(layer) {
     // check if all or nuclear only
     if (document.getElementById("toggle-nuclear-only").checked) {
       map.setFilter("powerplants_layer", [
-        "==",
-        ["get", "primary_fuel"],
-        "Nuclear",
+        "any",
+        ["==", ["get", "primary_fuel"], "Nuclear"],
+        ["==", ["get", "primary_fuel"], "Nuclear (undergoing decommissioning)"],
       ]);
     } else {
       map.setFilter("powerplants_layer", true);
