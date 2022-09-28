@@ -262,9 +262,9 @@ Promise.all([
         type: "fill",
         source: "epr",
         paint: {
-          "fill-color": "#fff",
+          "fill-color": "steelblue",
           "fill-opacity": 0.3,
-          "fill-outline-color": "#000",
+          "fill-outline-color": "steelblue",
         },
       },
       layerUnder
