@@ -77,6 +77,13 @@ let colorScheme = {
     [2, d3.schemeTableau10[7]],
     [3, d3.schemeTableau10[8]],
   ],
+  // humanitarian corridors status_result color scheme
+  hc: [
+    ["successful", "#0e73bd"],
+    ["disputed", "#860ebd"],
+    ["unsuccessful/disrupted", "#a40909"],
+    ["proposed route/outcome unknown", "#888"],
+  ],
 };
 let legendLabels = {
   acled: (d) => d,
@@ -84,12 +91,13 @@ let legendLabels = {
     ["State-Based Conflict", "Non-State Conflict", "One-Sided Violence"][
       +d - 1
     ],
+  hc: (d) => d,
 };
 
 // add legends
 layers.forEach(function (dataset) {
   let legend = d3
-    .select(`#${dataset}_legend`)
+    .select(`#${dataset}-legend`)
     .selectAll("label")
     .data(colorScheme[dataset])
     .enter()
@@ -144,7 +152,7 @@ Promise.all([
   d3.csv("data/global_power_plant_database_ukraine.csv"), // power plant locations
   d3.csv("data/ukraine_power_plants_extra_info.csv"), // power plant additional data
   d3.json("data/GeoEPR-2021-Ukraine.geojson"), // EPR ethnic makeup
-  d3.csv("data/Humanitarian Corridors_ Ukraine - HC_geocoded.csv"), // humanitarian corridors
+  d3.csv("data/Humanitarian Corridors Ukraine - HC_geocoded.csv"), // humanitarian corridors
 ]).then(function (data) {
   // modify data
   const acled = data[0];
@@ -340,7 +348,12 @@ Promise.all([
         "line-cap": "round",
       },
       paint: {
-        "line-color": "#333",
+        "line-color": [
+          "match",
+          ["get", "status_result"],
+          ...colorScheme.hc.flat(),
+          d3.schemeTableau10[9], // grey for missing types
+        ],
         "line-width": 1,
       },
     });
@@ -350,20 +363,27 @@ Promise.all([
         console.error("err image", err);
         return;
       }
-      map.addImage("arrow", image);
+      map.addImage("arrow", image, { sdf: "true" });
       map.addLayer({
         id: "hc_arrow_layer",
         type: "symbol",
         source: "hc",
-        paint: { "icon-color": "#333" },
         layout: {
           "symbol-placement": "line",
           "symbol-spacing": 100,
-          // "icon-allow-overlap": true,
-          // 'icon-ignore-placement': true,
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
           "icon-image": "arrow",
           "icon-size": 0.3,
           visibility: "visible",
+        },
+        paint: {
+          "icon-color": [
+            "match",
+            ["get", "status_result"],
+            ...colorScheme.hc.flat(),
+            d3.schemeTableau10[9], // grey for missing types
+          ],
         },
       });
     });
@@ -406,7 +426,7 @@ document.querySelectorAll(".filterInput").forEach((el) => {
 });
 
 function updateFilters(layer) {
-  if (layer === "ucdp" || layer === "acled") {
+  if (layer === "ucdp" || layer === "acled" || layer === "hc") {
     // set variables
     let varName;
     switch (layer) {
@@ -415,6 +435,9 @@ function updateFilters(layer) {
         break;
       case "acled":
         varName = "event_type";
+        break;
+      case "hc":
+        varName = "status_result";
         break;
       default:
       //
@@ -445,10 +468,10 @@ function updateFilters(layer) {
 
     // get list of checked layers
     let allNodes = document
-      .getElementById(layer + "_legend")
+      .getElementById(layer + "-legend")
       .querySelectorAll("input[type=checkbox]");
     let checkedNodes = document
-      .getElementById(layer + "_legend")
+      .getElementById(layer + "-legend")
       .querySelectorAll("input[type=checkbox]:checked");
     let checkedTypes = Array.from(checkedNodes).map(
       (d) => d.attributes.name.value
@@ -465,6 +488,9 @@ function updateFilters(layer) {
     // combine + set filters
     let filters = ["all", categoryFilter, minDateFilter, maxDateFilter];
     map.setFilter(layer + "_layer", filters);
+    if (layer === "hc") {
+      map.setFilter("hc_arrow_layer", filters);
+    }
   } else if (layer === "epr") {
     // no error but no filters either
   } else if (layer === "powerplants") {
