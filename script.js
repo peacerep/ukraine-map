@@ -160,15 +160,15 @@ Promise.all([
     d.properties.timestamp_start = new Date(d.properties.event_date).getTime();
     d.properties.timestamp_end = new Date(d.properties.event_date).getTime();
   });
+
   const ucdp = data[1];
   ucdp.features.forEach(function (d) {
     d.properties.timestamp_start = new Date(d.properties.date_start).getTime();
     d.properties.timestamp_end = new Date(d.properties.date_end).getTime();
   });
+
   const powerplants = data[2];
   const powerplants2 = data[3];
-  // console.log(powerplants, powerplants2);
-
   powerplants2.forEach((el) => {
     if (el.dataset === "Global Power Plant Database") {
       // find entry in powerplants db and add info
@@ -183,8 +183,6 @@ Promise.all([
       });
     }
   });
-  console.log(powerplants, powerplants2);
-
   const powerplants_geojson = {
     type: "FeatureCollection",
     features: powerplants.map(function (el) {
@@ -200,6 +198,7 @@ Promise.all([
   };
 
   const epr = data[4];
+
   const hc = data[5];
   const hc_geojson = {
     type: "FeatureCollection",
@@ -217,6 +216,10 @@ Promise.all([
       };
     }),
   };
+  hc_geojson.features.forEach(function (d) {
+    d.properties.timestamp_start = new Date(d.properties.date).getTime();
+    d.properties.timestamp_end = new Date(d.properties.date).getTime();
+  });
 
   // when map is ready, add data sources + vis layers
   map.on("load", function () {
