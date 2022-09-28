@@ -21,6 +21,10 @@ var map = new maplibregl.Map({
   preserveDrawingBuffer: true,
 });
 
+// all data layers will be placed under this and all following layers
+// makes city/country labels show up above data points
+const layerUnder = "place-other";
+
 // set min zoom to be one less than the zoom calculated to fit the bbox
 const minZoom = map.getZoom() - 1;
 map.setMinZoom(minZoom);
@@ -248,48 +252,57 @@ Promise.all([
       data: hc_geojson,
     });
 
-    map.addLayer({
-      id: "epr_layer",
-      type: "fill",
-      source: "epr",
-      paint: {
-        "fill-color": "#fff",
-        "fill-opacity": 0.3,
-        "fill-outline-color": "#000",
+    map.addLayer(
+      {
+        id: "epr_layer",
+        type: "fill",
+        source: "epr",
+        paint: {
+          "fill-color": "#fff",
+          "fill-opacity": 0.3,
+          "fill-outline-color": "#000",
+        },
       },
-    });
+      layerUnder
+    );
 
-    map.addLayer({
-      id: "acled_layer",
-      type: "circle",
-      source: "acled",
-      paint: {
-        "circle-color": [
-          "match",
-          ["get", "event_type"],
-          ...colorScheme.acled.flat(),
-          d3.schemeTableau10[9], // grey for missing types
-        ],
-        "circle-opacity": 0.7,
-        "circle-radius": 4,
+    map.addLayer(
+      {
+        id: "acled_layer",
+        type: "circle",
+        source: "acled",
+        paint: {
+          "circle-color": [
+            "match",
+            ["get", "event_type"],
+            ...colorScheme.acled.flat(),
+            d3.schemeTableau10[9], // grey for missing types
+          ],
+          "circle-opacity": 0.7,
+          "circle-radius": 4,
+        },
       },
-    });
+      layerUnder
+    );
 
-    map.addLayer({
-      id: "ucdp_layer",
-      type: "circle",
-      source: "ucdp",
-      paint: {
-        "circle-color": [
-          "match",
-          ["get", "type_of_violence"],
-          ...colorScheme.ucdp.flat(),
-          d3.schemeTableau10[9], // grey for missing types
-        ],
-        "circle-opacity": 0.7,
-        "circle-radius": 4,
+    map.addLayer(
+      {
+        id: "ucdp_layer",
+        type: "circle",
+        source: "ucdp",
+        paint: {
+          "circle-color": [
+            "match",
+            ["get", "type_of_violence"],
+            ...colorScheme.ucdp.flat(),
+            d3.schemeTableau10[9], // grey for missing types
+          ],
+          "circle-opacity": 0.7,
+          "circle-radius": 4,
+        },
       },
-    });
+      layerUnder
+    );
 
     map.loadImage("img/symbol_power.png", (error, img1) => {
       map.loadImage("img/symbol_nuclear.png", (error, img2) => {
@@ -300,66 +313,72 @@ Promise.all([
 
           // Nuclear (undergoing decommissioning)
 
-          map.addLayer({
-            id: "powerplants_layer",
-            type: "symbol",
-            source: "powerplants",
-            layout: {
-              "icon-allow-overlap": true,
-              "icon-image": [
-                "case",
-                ["==", ["get", "primary_fuel"], "Nuclear"],
-                "symbol_nuclear",
-                [
+          map.addLayer(
+            {
+              id: "powerplants_layer",
+              type: "symbol",
+              source: "powerplants",
+              layout: {
+                "icon-allow-overlap": true,
+                "icon-image": [
+                  "case",
+                  ["==", ["get", "primary_fuel"], "Nuclear"],
+                  "symbol_nuclear",
+                  [
+                    "case",
+                    [
+                      "==",
+                      ["get", "primary_fuel"],
+                      "Nuclear (undergoing decommissioning)",
+                    ],
+                    "symbol_nuclear_decom",
+                    "symbol_power",
+                  ],
+                ],
+                "icon-size": 0.5,
+                "symbol-sort-key": [
                   "case",
                   [
-                    "==",
-                    ["get", "primary_fuel"],
-                    "Nuclear (undergoing decommissioning)",
+                    "any",
+                    ["==", ["get", "primary_fuel"], "Nuclear"],
+                    [
+                      "==",
+                      ["get", "primary_fuel"],
+                      "Nuclear (undergoing decommissioning)",
+                    ],
                   ],
-                  "symbol_nuclear_decom",
-                  "symbol_power",
+                  1,
+                  0,
                 ],
-              ],
-              "icon-size": 0.5,
-              "symbol-sort-key": [
-                "case",
-                [
-                  "any",
-                  ["==", ["get", "primary_fuel"], "Nuclear"],
-                  [
-                    "==",
-                    ["get", "primary_fuel"],
-                    "Nuclear (undergoing decommissioning)",
-                  ],
-                ],
-                1,
-                0,
-              ],
+              },
             },
-          });
+            layerUnder
+          );
         });
       });
     });
 
-    map.addLayer({
-      id: "hc_layer",
-      type: "line",
-      source: "hc",
-      layout: {
-        "line-join": "round",
-        "line-cap": "round",
+    map.addLayer(
+      {
+        id: "hc_layer",
+        type: "line",
+        source: "hc",
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        paint: {
+          "line-color": [
+            "match",
+            ["get", "status_result"],
+            ...colorScheme.hc.flat(),
+            d3.schemeTableau10[9], // grey for missing types
+          ],
+          "line-width": 1,
+        },
       },
-      paint: {
-        "line-color": [
-          "match",
-          ["get", "status_result"],
-          ...colorScheme.hc.flat(),
-          d3.schemeTableau10[9], // grey for missing types
-        ],
-        "line-width": 1,
-      },
-    });
+      layerUnder
+    );
 
     map.loadImage("img/arrow.png", function (err, image) {
       if (err) {
@@ -367,28 +386,31 @@ Promise.all([
         return;
       }
       map.addImage("arrow", image, { sdf: "true" });
-      map.addLayer({
-        id: "hc_arrow_layer",
-        type: "symbol",
-        source: "hc",
-        layout: {
-          "symbol-placement": "line",
-          "symbol-spacing": 100,
-          "icon-allow-overlap": true,
-          "icon-ignore-placement": true,
-          "icon-image": "arrow",
-          "icon-size": 0.3,
-          visibility: "visible",
+      map.addLayer(
+        {
+          id: "hc_arrow_layer",
+          type: "symbol",
+          source: "hc",
+          layout: {
+            "symbol-placement": "line",
+            "symbol-spacing": 100,
+            "icon-allow-overlap": true,
+            "icon-ignore-placement": true,
+            "icon-image": "arrow",
+            "icon-size": 0.3,
+            visibility: "visible",
+          },
+          paint: {
+            "icon-color": [
+              "match",
+              ["get", "status_result"],
+              ...colorScheme.hc.flat(),
+              d3.schemeTableau10[9], // grey for missing types
+            ],
+          },
         },
-        paint: {
-          "icon-color": [
-            "match",
-            ["get", "status_result"],
-            ...colorScheme.hc.flat(),
-            d3.schemeTableau10[9], // grey for missing types
-          ],
-        },
-      });
+        layerUnder
+      );
     });
 
     // wait for data to load, then remove loading message
