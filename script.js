@@ -173,18 +173,22 @@ Promise.all([
 
   const powerplants = data[2];
   const powerplants2 = data[3];
+  // find keys that are used in the second dataset but not the first one
+  let addKeys = Object.keys(powerplants2[0]).filter(
+    (k) => !Object.keys(powerplants[0]).includes(k)
+  );
+
   powerplants2.forEach((el) => {
+    // add additional data from the second dataset to the first dataset
     if (el.dataset === "Global Power Plant Database") {
       // find entry in powerplants db and add info
       let index = powerplants.findIndex((d) => d.gppd_idnr === el.gppd_idnr);
-      powerplants[index].add_data = el;
-    } else {
-      powerplants.push({
-        longitude: el.longitude,
-        latitude: el.latitude,
-        primary_fuel: el.primary_fuel,
-        add_data: el,
+      addKeys.forEach((k) => {
+        powerplants[index][k] = el[k];
       });
+    } else {
+      // if id cannot be found (should only be for Chernobyl), add a new element
+      powerplants.push(el);
     }
   });
   const powerplants_geojson = {
@@ -254,7 +258,7 @@ Promise.all([
 
     map.addLayer(
       {
-        id: "epr_layer",
+        id: "epr-layer",
         type: "fill",
         source: "epr",
         paint: {
@@ -268,7 +272,7 @@ Promise.all([
 
     map.addLayer(
       {
-        id: "acled_layer",
+        id: "acled-layer",
         type: "circle",
         source: "acled",
         paint: {
@@ -287,7 +291,7 @@ Promise.all([
 
     map.addLayer(
       {
-        id: "ucdp_layer",
+        id: "ucdp-layer",
         type: "circle",
         source: "ucdp",
         paint: {
@@ -311,11 +315,9 @@ Promise.all([
           map.addImage("symbol_nuclear", img2);
           map.addImage("symbol_nuclear_decom", img3);
 
-          // Nuclear (undergoing decommissioning)
-
           map.addLayer(
             {
-              id: "powerplants_layer",
+              id: "powerplants-layer",
               type: "symbol",
               source: "powerplants",
               layout: {
@@ -329,7 +331,7 @@ Promise.all([
                     [
                       "==",
                       ["get", "primary_fuel"],
-                      "Nuclear (undergoing decommissioning)",
+                      "Nuclear – undergoing decommissioning",
                     ],
                     "symbol_nuclear_decom",
                     "symbol_power",
@@ -344,7 +346,7 @@ Promise.all([
                     [
                       "==",
                       ["get", "primary_fuel"],
-                      "Nuclear (undergoing decommissioning)",
+                      "Nuclear – undergoing decommissioning",
                     ],
                   ],
                   1,
@@ -358,9 +360,30 @@ Promise.all([
       });
     });
 
+    map.on("click", "powerplants-layer", (e) => {
+      var coordinates = e.features[0].geometry.coordinates.slice();
+      var tooltip =
+        "<b>" +
+        e.features[0].properties.name +
+        " (" +
+        e.features[0].properties.primary_fuel +
+        ")</b><br>" +
+        e.features[0].properties.tooltip_info +
+        "<br><b>Source:</b> " +
+        e.features[0].properties.additional_info_source_with_html;
+      new maplibregl.Popup().setLngLat(coordinates).setHTML(tooltip).addTo(map);
+    });
+    // change cursor to pointer when on the powerplants layer
+    map.on("mouseenter", "powerplants-layer", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", "powerplants-layer", () => {
+      map.getCanvas().style.cursor = "";
+    });
+
     map.addLayer(
       {
-        id: "hc_layer",
+        id: "hc-layer",
         type: "line",
         source: "hc",
         layout: {
@@ -388,7 +411,7 @@ Promise.all([
       map.addImage("arrow", image, { sdf: "true" });
       map.addLayer(
         {
-          id: "hc_arrow_layer",
+          id: "hc-arrow-layer",
           type: "symbol",
           source: "hc",
           layout: {
@@ -433,17 +456,17 @@ document.querySelectorAll(".filterInput").forEach((el) => {
     // show/hide data layers
     layers.forEach((layer) => {
       if (document.getElementById(`toggle-${layer}`).checked) {
-        map.setLayoutProperty(`${layer}_layer`, "visibility", "visible");
+        map.setLayoutProperty(`${layer}-layer`, "visibility", "visible");
         if (layer === "hc") {
-          map.setLayoutProperty(`hc_arrow_layer`, "visibility", "visible");
+          map.setLayoutProperty(`hc-arrow-layer`, "visibility", "visible");
         }
         // update filters for visible layers
         updateFilters(layer);
       } else {
         // hide unchecked layers, no need to update until checked again
-        map.setLayoutProperty(`${layer}_layer`, "visibility", "none");
+        map.setLayoutProperty(`${layer}-layer`, "visibility", "none");
         if (layer === "hc") {
-          map.setLayoutProperty(`hc_arrow_layer`, "visibility", "none");
+          map.setLayoutProperty(`hc-arrow-layer`, "visibility", "none");
         }
       }
     });
@@ -477,7 +500,6 @@ function updateFilters(layer) {
       if (d === "") {
         return null;
       } else {
-        console.log(id, new Date(d).getTime());
         return new Date(d).getTime();
       }
     }
@@ -512,9 +534,9 @@ function updateFilters(layer) {
 
     // combine + set filters
     let filters = ["all", categoryFilter, minDateFilter, maxDateFilter];
-    map.setFilter(layer + "_layer", filters);
+    map.setFilter(layer + "-layer", filters);
     if (layer === "hc") {
-      map.setFilter("hc_arrow_layer", filters);
+      map.setFilter("hc-arrow-layer", filters);
     }
   } else if (layer === "epr") {
     // no error but no filters either
@@ -522,13 +544,13 @@ function updateFilters(layer) {
     // no time filter
     // check if all or nuclear only
     if (document.getElementById("toggle-nuclear-only").checked) {
-      map.setFilter("powerplants_layer", [
+      map.setFilter("powerplants-layer", [
         "any",
         ["==", ["get", "primary_fuel"], "Nuclear"],
-        ["==", ["get", "primary_fuel"], "Nuclear (undergoing decommissioning)"],
+        ["==", ["get", "primary_fuel"], "Nuclear – undergoing decommissioning"],
       ]);
     } else {
-      map.setFilter("powerplants_layer", true);
+      map.setFilter("powerplants-layer", true);
     }
   } else {
     console.log("error - filters not implemented for layer: ", layer);
