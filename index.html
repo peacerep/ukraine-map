@@ -13,6 +13,14 @@
 			href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗺</text></svg>"
 		/>
 
+		<!-- Montserrat Font at weights 40 (regular) + 700 (bold)-->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+			rel="stylesheet"
+		/>
+
 		<!-- MapLibre GL JS -->
 		<script src="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js"></script>
 		<link
@@ -48,35 +56,41 @@
 					/></a>
 				</div>
 				<div id="zoomcontrols">
-					Map Zoom
+					<div style="font-weight: bold">Map Zoom</div>
 					<button id="zoomIn">+</button><button id="zoomOut">–</button
 					><button id="zoomReset">Reset</button>
-					Zoom to
+					<div>Zoom to:</div>
 					<select id="selectZoomTo">
 						<option value="none" selected disabled hidden>
 							Select a region
 						</option>
 					</select>
 				</div>
+				<button id="captureScreenshot" onclick="captureScreenshot()">
+					Capture screenshot of map
+				</button>
 				<div id="loading-message">Loading data...</div>
 			</div>
 			<div id="sidebar">
-				<h1>Filters</h1>
+				<h1>Conflict Map – Ukraine</h1>
+				<p>Use the filters to adjust the data shown on the map.</p>
 
-				Show data from
-				<input
-					type="date"
-					id="min-date"
-					name="min-date"
-					class="filterInput"
-				/>
-				to
-				<input
-					type="date"
-					id="max-date"
-					name="max-date"
-					class="filterInput"
-				/>
+				<div class="layerHeader">
+					Show data from
+					<input
+						type="date"
+						id="min-date"
+						name="min-date"
+						class="filterInput"
+					/>
+					to
+					<input
+						type="date"
+						id="max-date"
+						name="max-date"
+						class="filterInput"
+					/>
+				</div>
 
 				<div id="acled-header" class="layerHeader">
 					<input
@@ -154,13 +168,9 @@
 					><button id="hc-info" class="infoButton">?</button>
 				</div>
 				<div id="hc-legend" class="legend"></div>
-				<!-- <div id="hc-options"></div> -->
 
-				<button id="captureScreenshot" onclick="captureScreenshot()">
-					Capture screenshot of current map view
-				</button>
 				<button id="resetFilters" onclick="resetFilters()">
-					Reset all filters
+					Reset filters
 				</button>
 			</div>
 		</div>

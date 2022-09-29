@@ -2,13 +2,14 @@
 	box-sizing: border-box;
 	padding: 0;
 	margin: 0;
-	font-family: sans-serif;
+	font-family: "Montserrat", sans-serif;
+	font-size: 12px;
 }
 
 button {
 	background-color: #fff;
 	color: #323243;
-	border: 2px solid #cecece;
+	border: 1px solid #aaa;
 }
 button:hover {
 	background-color: #eee;
@@ -16,6 +17,7 @@ button:hover {
 
 h1 {
 	margin: 5px 0 10px 0;
+	font-size: 1.2em;
 }
 
 .grid-container {
@@ -41,39 +43,49 @@ h1 {
 #zoomcontrols {
 	display: block;
 	position: absolute;
-	width: 450px;
-	height: 40px;
-	font-size: 15px;
-	line-height: 40px;
+	/*width: 450px;*/
+	height: 30px;
 	background-color: #fff;
 	top: 0;
 	right: 0;
-	margin: 10px;
+	margin: 7px;
 	/*	bottom: 10px;
 	left: 0;
 	right: 0;
 	margin: 15px auto;*/
 	/*https://www.w3schools.com/csS/css3_shadows_box.asp*/
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-	border-radius: 10px;
-	padding: 0 10px;
+	border-radius: 7px;
+	/*padding: 0 7px;*/
 	color: #323243;
 }
-
 #zoomcontrols * {
 	display: inline-block;
 	height: 100%;
-	font-size: 15px;
+	padding: 0 10px;
+	font-size: 12px;
+	line-height: 30px;
 }
-
 #zoomcontrols select {
 	width: 135px;
 }
-
 #zoomcontrols button {
 	border-top: none;
 	border-bottom: none;
-	padding: 0 15px;
+	/*width: 30px;*/
+}
+
+button#captureScreenshot {
+	display: block;
+	position: absolute;
+	height: 30px;
+	right: 0;
+	bottom: 0;
+	margin: 0 7px 27px 0px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	border: none;
+	border-radius: 7px;
+	padding: 0 10px;
 }
 
 #zoomIn,
@@ -108,7 +120,8 @@ h1 {
 	padding: 10px;
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 	z-index: 999; /*for shadow to show up*/
-	position: relative; /*to position reset button*/
+	/*position: relative; to position reset button*/
+	overflow-y: scroll;
 }
 
 /* CHECKBOXES DATASETS*/
@@ -123,20 +136,21 @@ h1 {
 .layerHeader {
 	position: relative;
 	width: 100%;
-	border-top: 2px solid #ccc;
-	padding: 10px 0 2px 0;
-	margin: 3px 0;
+	border-top: 1px solid #aaa;
+	padding: 5px 0 0 0;
+	margin: 5px 0;
+	line-height: 20px; /*match height of info button*/
 }
+
 .infoButton {
 	display: block;
 	position: absolute;
 	right: 0;
 	top: 0;
 	margin: 5px 0;
-	width: 22px;
-	height: 22px;
-	border-radius: 11px;
-	line-height: 21px;
+	width: 20px;
+	height: 20px;
+	border-radius: 10px;
 	font-weight: bold;
 	cursor: pointer;
 }
@@ -150,7 +164,7 @@ h1 {
 .checkbox-container {
 	display: block;
 	position: relative;
-	padding: 4px 4px 4px 20px;
+	padding: 2px 2px 2px 18px;
 	cursor: pointer;
 	user-select: none;
 }
@@ -170,7 +184,7 @@ h1 {
 	width: 12px;
 	height: 12px;
 	border-radius: 6px;
-	margin: 0 3px;
+	/*margin: 0 3px;*/
 }
 /* color circle grey when not checked */
 .checkbox-container input:not(:checked) ~ .checkmark {
@@ -181,7 +195,7 @@ h1 {
 	content: "";
 	position: absolute;
 	display: block;
-	border-bottom: 2px solid #323243;
+	border-bottom: 1px solid #aaa;
 	width: 20px;
 	transform: rotate(-45deg);
 	transform-origin: 0% 100%;
@@ -196,33 +210,27 @@ h1 {
 	background-color: #eee;
 }
 
-button#captureScreenshot,
 button#resetFilters {
 	padding: 10px;
-	border-radius: 10px;
-}
-button#resetFilters {
-	position: absolute;
-	left: 0;
-	right: 0;
-	margin: auto;
-	bottom: 10px;
-	width: 150px;
-}
-button#captureScreenshot {
+	border-radius: 7px;
+	width: 100%;
 }
 
 .infoBox {
-	border: 1px solid #b2b0bb;
+	border: 1px solid #aaa;
 	border-radius: 5px;
 	padding: 3px;
 	margin: 8px 0 3px 0;
 	background-color: #f8f5f1;
+	position: relative;
 }
 .closebtn {
-	float: right;
 	cursor: pointer;
 	color: #666;
+	font-size: 22px;
+	position: absolute;
+	top: 0;
+	right: 0;
 }
 .closebtn:hover {
 	font-weight: bold;
