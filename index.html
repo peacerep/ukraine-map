@@ -33,12 +33,8 @@
 		<link rel="stylesheet" href="style.css" />
 
 		<script src="https://d3js.org/d3.v7.min.js"></script>
-		<!-- <script src="https://unpkg.com/topojson@3"></script> -->
 	</head>
 	<body>
-		<!-- to handle js-generated events -->
-		<!-- <div id="eventHandler" class="input hidden"></div> -->
-
 		<div class="grid-container">
 			<div id="map-container">
 				<div id="map">
@@ -97,41 +93,97 @@
 						type="checkbox"
 						name="ACLED"
 						id="toggle-acled"
-						class="filterInput"
+						class="filterInput layerToggle"
 						checked
 					/>
 					<label for="toggle-acled" class="labelDataset">
 						ACLED: Conflict Violence</label
 					><button id="acled-info" class="infoButton">?</button>
+					<div id="acled-info-box" class="infoBox">
+						ACLED (Armed Conflict Location & Event Data Project),
+						downloaded via the
+						<a
+							href="https://acleddata.com/data-export-tool/"
+							target="_blank"
+							>ACLED data export tool</a
+						>
+						(filtered for Ukraine only)<br />
+						<a
+							href="https://acleddata.com/dashboard/"
+							target="_blank"
+							>ACLED Dashboard</a
+						><br />
+						<a
+							href="https://acleddata.com/download/2827/"
+							target="_blank"
+							>Codebook</a
+						><br />
+						Time period covered by data: 2018-01-01 – present<br />
+						Last updated: 2022-08-07
+					</div>
+					<div id="acled-options" class="layerOptions">
+						<!-- added in js -->
+					</div>
 				</div>
-
-				<div id="acled-legend" class="legend"></div>
 
 				<div id="ucdp-header" class="layerHeader">
 					<input
 						type="checkbox"
 						name="UCDP"
 						id="toggle-ucdp"
-						class="filterInput"
+						class="filterInput layerToggle"
 						checked
 					/>
 					<label for="toggle-ucdp" class="labelDataset">
 						UCDP: Deaths in conflict</label
 					><button id="ucdp-info" class="infoButton">?</button>
+					<div id="ucdp-info-box" class="infoBox">
+						UCDP Georeferenced Event Dataset (GED) Global version
+						22.1 via the
+						<a href="https://ucdp.uu.se/apidocs/" target="_blank"
+							>UCDP API</a
+						>
+						(filtered for Ukraine only)<br />
+						<a href="https://ucdp.uu.se/" target="_blank"
+							>UCDP Dashboard</a
+						><br />
+						<a
+							href="https://ucdp.uu.se/downloads/ged/ged221.pdf"
+							target="_blank"
+							>Codebook</a
+						><br />
+						Time period covered by data: 1989-01-01 – 2021-12- 31
+					</div>
+					<div id="ucdp-options" class="layerOptions">
+						<!-- added in js -->
+					</div>
 				</div>
-				<div id="ucdp-legend" class="legend"></div>
 
 				<div id="epr-header" class="layerHeader">
 					<input
 						type="checkbox"
 						name="EPR"
 						id="toggle-epr"
-						class="filterInput"
+						class="filterInput layerToggle"
 						checked
 					/>
 					<label for="toggle-epr" class="labelDataset">
 						EPR: Ethnic Makeup (2021)</label
 					><button id="epr-info" class="infoButton">?</button>
+					<div id="epr-info-box" class="infoBox">
+						<a
+							href="https://icr.ethz.ch/data/epr/geoepr/"
+							target="_blank"
+							>GeoEPR 2021 dataset</a
+						><br />
+						<a
+							href="https://icr.ethz.ch/data/epr/geoepr/EPR_2021_Codebook_GeoEPR.pdf"
+							target="_blank"
+							>Codebook</a
+						><br />Time period covered by data: 1946 – 2021<br />
+						Release date: 2021-06-08
+					</div>
+					<div id="epr-options" class="layerOptions"></div>
 				</div>
 
 				<div id="powerplants-header" class="layerHeader">
@@ -139,22 +191,37 @@
 						type="checkbox"
 						name="Power Plants"
 						id="toggle-powerplants"
-						class="filterInput"
+						class="filterInput layerToggle"
 						checked
 					/>
 					<label for="toggle-powerplants" class="labelDataset">
 						Power Plants</label
 					><button id="powerplants-info" class="infoButton">?</button>
-				</div>
-				<div id="powerplants-options">
-					<input
-						type="checkbox"
-						name=""
-						id="toggle-nuclear-only"
-						class="filterInput"
-					/><label for="toggle-nuclear-only">
-						show only nuclear power plants</label
-					>
+					<div id="powerplants-info-box" class="infoBox">
+						<a
+							href="https://datasets.wri.org/dataset/globalpowerplantdatabase"
+							target="_blank"
+							>Global Power Plant Database v1.3.0</a
+						><br />
+						Release date: 2021-06-02<br />
+						Additional data on nuclear power plants
+						<a
+							href="https://www.oecd-nea.org/jcms/pl_66130/ukraine-current-status-of-nuclear-power-installations"
+							target="_blank"
+							>via OECD</a
+						>
+						(last updated: 2022-08-19)
+					</div>
+					<div id="powerplants-options" class="layerOptions">
+						<input
+							type="checkbox"
+							name=""
+							id="toggle-nuclear-only"
+							class="filterInput layerToggle"
+						/><label for="toggle-nuclear-only">
+							show only nuclear power plants</label
+						>
+					</div>
 				</div>
 
 				<div id="hc-header" class="layerHeader">
@@ -162,14 +229,19 @@
 						type="checkbox"
 						name="Humanitarian Corridors"
 						id="toggle-hc"
-						class="filterInput"
+						class="filterInput layerToggle"
 						checked
 					/>
 					<label for="toggle-hc" class="labelDataset">
 						Humanitarian Corridors</label
 					><button id="hc-info" class="infoButton">?</button>
+					<div id="hc-info-box" class="infoBox">
+						Data from research by PeaceRep and partners<br />
+						Time period covered by data: 2022-03-05 – 2022-05-04<br />
+						Last updated: 2022-05
+					</div>
+					<div id="hc-options" class="layerOptions"></div>
 				</div>
-				<div id="hc-legend" class="legend"></div>
 
 				<button id="resetFilters" onclick="resetFilters()">
 					Reset filters

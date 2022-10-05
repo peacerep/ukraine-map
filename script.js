@@ -33,24 +33,9 @@ map.setMinZoom(minZoom);
 
 const layers = ["acled", "ucdp", "epr", "powerplants", "hc"];
 
-const layersInfo = {
-  acled:
-    'ACLED (Armed Conflict Location & Event Data Project), downloaded via the <a href="https://acleddata.com/data-export-tool/" target="_blank">ACLED data export tool</a> (filtered for Ukraine only)<br><a href="https://acleddata.com/dashboard/" target="_blank">ACLED Dashboard</a><br><a href="https://acleddata.com/download/2827/" target="_blank">Codebook</a><br>Time period covered by data: 2018-01-01 – present<br>Last updated: 2022-08-07',
-  ucdp: 'UCDP Georeferenced Event Dataset (GED) Global version 22.1 via the <a href="https://ucdp.uu.se/apidocs/" target="_blank">UCDP API</a> (filtered for Ukraine only)<br><a href="https://ucdp.uu.se/" target="_blank">UCDP Dashboard</a><br><a href="https://ucdp.uu.se/downloads/ged/ged221.pdf" target="_blank">Codebook</a><br>Time period covered by data: 1989-01-01 – 2021-12- 31',
-  epr: '<a href="https://icr.ethz.ch/data/epr/geoepr/" target="_blank">GeoEPR 2021 dataset</a><br><a href="https://icr.ethz.ch/data/epr/geoepr/EPR_2021_Codebook_GeoEPR.pdf" target="_blank">Codebook</a><br>Time period covered by data: 1946 – 2021<br>Release date: 2021-06-08',
-  powerplants:
-    '<a href="https://datasets.wri.org/dataset/globalpowerplantdatabase" target="_blank">Global Power Plant Database v1.3.0</a><br>Release date: 2021-06-02<br>Additional data on nuclear power plants <a href="https://www.oecd-nea.org/jcms/pl_66130/ukraine-current-status-of-nuclear-power-installations" target="_blank">via OECD</a> (last updated: 2022-08-19)',
-  hc: "Data from research by PeaceRep and partners<br>Time period covered by data: 2022-03-05 – 2022-05-04<br>Last updated: 2022-05",
-};
-
-// add info boxes
+// make info boxes togglable
 layers.forEach((layer) => {
-  // create hidden info box
-  d3.select("#" + layer + "-header")
-    .append("div")
-    .attr("class", "infoBox")
-    .attr("id", layer + "-info-box")
-    .html(layersInfo[layer])
+  d3.select("#" + layer + "-info-box")
     .classed("hidden", true)
     .append("span")
     .attr("class", "closebtn")
@@ -64,7 +49,8 @@ layers.forEach((layer) => {
   });
 });
 
-// color schemes for all datasets
+// auto-generate options boxes for three of the datasets
+// color schemes
 let colorScheme = {
   // ACLED event_type color scheme
   acled: [
@@ -89,7 +75,7 @@ let colorScheme = {
     ["proposed route/outcome unknown", "#888"],
   ],
 };
-let legendLabels = {
+let optionLabels = {
   acled: (d) => d,
   ucdp: (d) =>
     ["State-Based Conflict", "Non-State Conflict", "One-Sided Violence"][
@@ -97,25 +83,24 @@ let legendLabels = {
     ],
   hc: (d) => d,
 };
-
-// add legends
-layers.forEach(function (dataset) {
-  let legend = d3
-    .select(`#${dataset}-legend`)
+// add option menus
+Object.keys(colorScheme).forEach(function (layer) {
+  let options = d3
+    .select(`#${layer}-options`)
     .selectAll("label")
-    .data(colorScheme[dataset])
+    .data(colorScheme[layer])
     .enter()
     .append("label")
     .attr("class", "checkbox-container")
-    .html((d) => legendLabels[dataset](d[0]));
-  legend
+    .html((d) => optionLabels[layer](d[0]));
+  options
     .append("input")
     .attr("type", "checkbox")
     .attr("class", "filterInput")
-    .attr("id", (d) => `filter_${dataset}_${d[0]}`)
+    .attr("id", (d) => `filter_${layer}_${d[0]}`)
     .attr("name", (d) => d[0])
     .property("checked", true);
-  legend
+  options
     .append("span")
     .attr("class", "checkmark")
     .style("background-color", (d) => d[1]);
@@ -206,6 +191,7 @@ Promise.all([
   };
 
   const epr = data[4];
+  console.log(epr);
 
   const hc = data[5];
   const hc_geojson = {
@@ -515,10 +501,10 @@ function updateFilters(layer) {
 
     // get list of checked layers
     let allNodes = document
-      .getElementById(layer + "-legend")
+      .getElementById(layer + "-options")
       .querySelectorAll("input[type=checkbox]");
     let checkedNodes = document
-      .getElementById(layer + "-legend")
+      .getElementById(layer + "-options")
       .querySelectorAll("input[type=checkbox]:checked");
     let checkedTypes = Array.from(checkedNodes).map(
       (d) => d.attributes.name.value

@@ -128,6 +128,7 @@ button#captureScreenshot {
 .labelDataset {
 	display: inline-block;
 	font-weight: bold;
+	line-height: 20px; /*match height of info button*/
 }
 .labelDataset input {
 	position: absolute;
@@ -139,9 +140,7 @@ button#captureScreenshot {
 	border-top: 1px solid #aaa;
 	padding: 5px 0 0 0;
 	margin: 5px 0;
-	line-height: 20px; /*match height of info button*/
 }
-
 .infoButton {
 	display: block;
 	position: absolute;
@@ -157,8 +156,15 @@ button#captureScreenshot {
 .infoButton:hover {
 	background-color: #eee;
 }
+.layerOptions {
+	margin-top: 2px;
+}
 
-/* CHECKBOXES LEGENDS */
+.layerToggle:not(:checked) ~ .layerOptions {
+	display: none;
+}
+
+/* CHECKBOXES OPTIONS / LEGEND */
 
 /* style checkbox container (label element) */
 .checkbox-container {
