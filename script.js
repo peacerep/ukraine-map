@@ -270,6 +270,9 @@ Promise.all([
           ],
           "fill-opacity": 0.25,
         },
+        layout: {
+          visibility: "none",
+        },
       },
       layerUnder
     );
@@ -286,6 +289,9 @@ Promise.all([
             eprColor, // for missing types
           ],
           "line-width": 1,
+        },
+        layout: {
+          visibility: "none",
         },
       },
       layerUnder
@@ -311,6 +317,9 @@ Promise.all([
           "circle-opacity": 0.7,
           "circle-radius": 4,
         },
+        layout: {
+          visibility: "none",
+        },
       },
       layerUnder
     );
@@ -330,6 +339,9 @@ Promise.all([
           "circle-opacity": 0.7,
           "circle-radius": 4,
         },
+        layout: {
+          visibility: "none",
+        },
       },
       layerUnder
     );
@@ -347,6 +359,7 @@ Promise.all([
               type: "symbol",
               source: "powerplants",
               layout: {
+                visibility: "none",
                 "icon-allow-overlap": true,
                 "icon-image": [
                   "case",
@@ -413,6 +426,7 @@ Promise.all([
         type: "line",
         source: "hc",
         layout: {
+          visibility: "none",
           "line-join": "round",
           "line-cap": "round",
         },
@@ -441,13 +455,13 @@ Promise.all([
           type: "symbol",
           source: "hc",
           layout: {
+            visibility: "none",
             "symbol-placement": "line",
             "symbol-spacing": 100,
             "icon-allow-overlap": true,
             "icon-ignore-placement": true,
             "icon-image": "arrow",
             "icon-size": 0.3,
-            visibility: "visible",
           },
           paint: {
             "icon-color": [
