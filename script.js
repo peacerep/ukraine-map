@@ -50,6 +50,7 @@ layers.forEach((layer) => {
 });
 
 // auto-generate options boxes for three of the datasets
+let eprColor = "#c48e29";
 // color schemes
 let colorScheme = {
   // ACLED event_type color scheme
@@ -74,6 +75,15 @@ let colorScheme = {
     ["unsuccessful/disrupted", "#a40909"],
     ["proposed route/outcome unknown", "#888"],
   ],
+  // epr group color scheme -- could add different colors for each here
+  epr: [
+    ["Ukrainians", eprColor],
+    ["Russians", eprColor],
+    ["Rusyns", eprColor],
+    ["Romanians/Moldovans", eprColor],
+    ["Hungarians", eprColor],
+    ["Crimean Tatars", eprColor], // these are not in the 2015-21 data
+  ],
 };
 let optionLabels = {
   acled: (d) => d,
@@ -82,11 +92,13 @@ let optionLabels = {
       +d - 1
     ],
   hc: (d) => d,
+  epr: (d) => d,
 };
 // add option menus
 Object.keys(colorScheme).forEach(function (layer) {
   let options = d3
     .select(`#${layer}-options`)
+    .append("div")
     .selectAll("label")
     .data(colorScheme[layer])
     .enter()
@@ -242,19 +254,47 @@ Promise.all([
       data: hc_geojson,
     });
 
+    var popup = new maplibregl.Popup();
+
     map.addLayer(
       {
         id: "epr-layer",
         type: "fill",
         source: "epr",
         paint: {
-          "fill-color": "steelblue",
-          "fill-opacity": 0.3,
-          "fill-outline-color": "steelblue",
+          "fill-color": [
+            "match",
+            ["get", "group"],
+            ...colorScheme.epr.flat(),
+            eprColor, // for missing types
+          ],
+          "fill-opacity": 0.25,
         },
       },
       layerUnder
     );
+    map.addLayer(
+      {
+        id: "epr-outline-layer",
+        type: "line",
+        source: "epr",
+        paint: {
+          "line-color": [
+            "match",
+            ["get", "group"],
+            ...colorScheme.epr.flat(),
+            eprColor, // for missing types
+          ],
+          "line-width": 1,
+        },
+      },
+      layerUnder
+    );
+    map.on("click", "epr-layer", (e) => {
+      var coordinates = e.lngLat;
+      var tooltip = "Ethnic group: " + e.features[0].properties.group;
+      popup.setLngLat(coordinates).setHTML(tooltip).addTo(map);
+    });
 
     map.addLayer(
       {
@@ -357,7 +397,7 @@ Promise.all([
         e.features[0].properties.tooltip_info +
         "<br><b>Source:</b> " +
         e.features[0].properties.additional_info_source_with_html;
-      new maplibregl.Popup().setLngLat(coordinates).setHTML(tooltip).addTo(map);
+      popup.setLngLat(coordinates).setHTML(tooltip).addTo(map);
     });
     // change cursor to pointer when on the powerplants layer
     map.on("mouseenter", "powerplants-layer", () => {
@@ -445,6 +485,8 @@ document.querySelectorAll(".filterInput").forEach((el) => {
         map.setLayoutProperty(`${layer}-layer`, "visibility", "visible");
         if (layer === "hc") {
           map.setLayoutProperty(`hc-arrow-layer`, "visibility", "visible");
+        } else if (layer === "epr") {
+          map.setLayoutProperty(`epr-outline-layer`, "visibility", "visible");
         }
         // update filters for visible layers
         updateFilters(layer);
@@ -453,6 +495,8 @@ document.querySelectorAll(".filterInput").forEach((el) => {
         map.setLayoutProperty(`${layer}-layer`, "visibility", "none");
         if (layer === "hc") {
           map.setLayoutProperty(`hc-arrow-layer`, "visibility", "none");
+        } else if (layer === "epr") {
+          map.setLayoutProperty(`epr-outline-layer`, "visibility", "none");
         }
       }
     });
@@ -460,23 +504,60 @@ document.querySelectorAll(".filterInput").forEach((el) => {
 });
 
 function updateFilters(layer) {
-  if (layer === "ucdp" || layer === "acled" || layer === "hc") {
-    // set variables
-    let varName;
-    switch (layer) {
-      case "ucdp":
-        varName = "type_of_violence";
-        break;
-      case "acled":
-        varName = "event_type";
-        break;
-      case "hc":
-        varName = "status_result";
-        break;
-      default:
-      //
-    }
+  let c, t, filters;
+  switch (layer) {
+    case "ucdp":
+      c = getCategoryFilter("ucdp", "type_of_violence");
+      t = getDateFilter();
+      filters = ["all", c, t.min, t.max];
+      map.setFilter("ucdp-layer", filters);
+      break;
+    case "acled":
+      c = getCategoryFilter("acled", "event_type");
+      t = getDateFilter();
+      filters = ["all", c, t.min, t.max];
+      map.setFilter("acled-layer", filters);
+      break;
+    case "hc":
+      c = getCategoryFilter("hc", "status_result");
+      t = getDateFilter();
+      filters = ["all", c, t.min, t.max];
+      map.setFilter("hc-layer", filters);
+      map.setFilter("hc-arrow-layer", filters);
+      break;
+    case "epr":
+      t = [
+        "==",
+        ["get", "from"],
+        document.getElementById("epr-time1").checked ? 1991 : 2015,
+      ];
+      c = getCategoryFilter("epr", "group");
+      // combine + set filters
+      map.setFilter("epr-layer", ["all", c, t]);
+      map.setFilter("epr-outline-layer", ["all", c, t]);
+      break;
+    case "powerplants":
+      // no time filter
+      // check if all or nuclear only
+      if (document.getElementById("toggle-nuclear-only").checked) {
+        map.setFilter("powerplants-layer", [
+          "any",
+          ["==", ["get", "primary_fuel"], "Nuclear"],
+          [
+            "==",
+            ["get", "primary_fuel"],
+            "Nuclear – undergoing decommissioning",
+          ],
+        ]);
+      } else {
+        map.setFilter("powerplants-layer", true);
+      }
+      break;
+    default:
+      console.log("error - filters not implemented for layer: ", layer);
+  }
 
+  function getDateFilter() {
     // get time span
     // using time stamps bc maplibre does not support date objects
     let minDate = getDate("min-date");
@@ -489,7 +570,6 @@ function updateFilters(layer) {
         return new Date(d).getTime();
       }
     }
-
     let minDateFilter =
       minDate === null
         ? true
@@ -498,7 +578,10 @@ function updateFilters(layer) {
       maxDate === null
         ? true
         : ["<=", ["number", ["get", "timestamp_start"]], maxDate];
+    return { min: minDateFilter, max: maxDateFilter };
+  }
 
+  function getCategoryFilter(layer, varName) {
     // get list of checked layers
     let allNodes = document
       .getElementById(layer + "-options")
@@ -509,7 +592,6 @@ function updateFilters(layer) {
     let checkedTypes = Array.from(checkedNodes).map(
       (d) => d.attributes.name.value
     );
-
     // set category filter accordingly
     let categoryFilter =
       checkedNodes.length === allNodes.length
@@ -517,29 +599,7 @@ function updateFilters(layer) {
           true
         : // otherwise filter for checked items only
           ["in", ["to-string", ["get", varName]], ["literal", checkedTypes]];
-
-    // combine + set filters
-    let filters = ["all", categoryFilter, minDateFilter, maxDateFilter];
-    map.setFilter(layer + "-layer", filters);
-    if (layer === "hc") {
-      map.setFilter("hc-arrow-layer", filters);
-    }
-  } else if (layer === "epr") {
-    // no error but no filters either
-  } else if (layer === "powerplants") {
-    // no time filter
-    // check if all or nuclear only
-    if (document.getElementById("toggle-nuclear-only").checked) {
-      map.setFilter("powerplants-layer", [
-        "any",
-        ["==", ["get", "primary_fuel"], "Nuclear"],
-        ["==", ["get", "primary_fuel"], "Nuclear – undergoing decommissioning"],
-      ]);
-    } else {
-      map.setFilter("powerplants-layer", true);
-    }
-  } else {
-    console.log("error - filters not implemented for layer: ", layer);
+    return categoryFilter;
   }
 }
 

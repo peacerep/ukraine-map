@@ -216,6 +216,38 @@ button#captureScreenshot {
 	background-color: #eee;
 }
 
+/*style radio buttons*/
+.switchContainer {
+	display: block;
+	margin: 10px 0;
+}
+.switchContainer input[type="radio"] {
+	display: none;
+}
+.switchContainer label {
+	padding: 5px 10px;
+	background-color: #fff;
+	color: #323243;
+	border: 1px solid #aaa;
+}
+.switchContainer label:hover {
+	background-color: #eee;
+}
+.switchContainer input[type="radio"]:checked + label {
+	background-color: #4d8cbb;
+	color: #fff;
+}
+.switchContainer input[type="radio"]:checked + label:hover {
+	background-color: #6399c1;
+}
+.switchContainer label.left {
+	border-radius: 7px 0 0 7px;
+	border-right: none;
+}
+.switchContainer label.right {
+	border-radius: 0 7px 7px 0;
+}
+
 button#resetFilters {
 	padding: 10px;
 	border-radius: 7px;

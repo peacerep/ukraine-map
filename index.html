@@ -183,7 +183,26 @@
 						><br />Time period covered by data: 1946 – 2021<br />
 						Release date: 2021-06-08
 					</div>
-					<div id="epr-options" class="layerOptions"></div>
+					<div id="epr-options" class="layerOptions">
+						<div class="switchContainer">
+							<input
+								type="radio"
+								id="epr-time1"
+								name="epr-subset"
+								class="filterInput"
+							/><label for="epr-time1" class="left"
+								>1991–2014</label
+							><input
+								type="radio"
+								id="epr-time2"
+								name="epr-subset"
+								class="filterInput"
+								checked
+							/><label for="epr-time2" class="right"
+								>2015–2021</label
+							>
+						</div>
+					</div>
 				</div>
 
 				<div id="powerplants-header" class="layerHeader">
@@ -233,7 +252,7 @@
 						checked
 					/>
 					<label for="toggle-hc" class="labelDataset">
-						Humanitarian Corridors</label
+						Humanitarian Corridors (April–May 2022)</label
 					><button id="hc-info" class="infoButton">?</button>
 					<div id="hc-info-box" class="infoBox">
 						Data from research by PeaceRep and partners<br />
