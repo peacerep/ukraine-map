@@ -203,7 +203,6 @@ Promise.all([
   };
 
   const epr = data[4];
-  console.log(epr);
 
   const hc = data[5];
   const hc_geojson = {
@@ -437,13 +436,38 @@ Promise.all([
             ...colorScheme.hc.flat(),
             d3.schemeTableau10[9], // grey for missing types
           ],
-          "line-width": 1,
+          "line-width": 5,
+          "line-opacity": 0.6,
         },
       },
       layerUnder
     );
+    map.on("click", "hc-layer", (e) => {
+      var coordinates = e.lngLat;
+      var tooltip =
+        "Humanitarian Corridor:<br>Date: " +
+        e.features[0].properties.date +
+        "<br>From " +
+        e.features[0].properties.from_name +
+        " (" +
+        e.features[0].properties.from_country_code +
+        ") to " +
+        e.features[0].properties.to_name +
+        " (" +
+        e.features[0].properties.to_country_code +
+        ")<br>Status: " +
+        e.features[0].properties.status_result;
+      popup.setLngLat(coordinates).setHTML(tooltip).addTo(map);
+    });
+    // change cursor to pointer when on the powerplants layer
+    map.on("mouseenter", "hc-layer", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", "hc-layer", () => {
+      map.getCanvas().style.cursor = "";
+    });
 
-    map.loadImage("img/arrow.png", function (err, image) {
+    map.loadImage("img/arrow2.png", function (err, image) {
       if (err) {
         console.error("err image", err);
         return;
@@ -457,11 +481,11 @@ Promise.all([
           layout: {
             visibility: "none",
             "symbol-placement": "line",
-            "symbol-spacing": 100,
+            "symbol-spacing": 1,
             "icon-allow-overlap": true,
             "icon-ignore-placement": true,
             "icon-image": "arrow",
-            "icon-size": 0.3,
+            "icon-size": 5 / 24, // icon size is 24, scale to line width
           },
           paint: {
             "icon-color": [
