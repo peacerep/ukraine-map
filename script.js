@@ -540,15 +540,17 @@ function updateFilters(layer) {
       map.setFilter("hc-arrow-layer", filters);
       break;
     case "epr":
-      t = [
-        "==",
-        ["get", "from"],
-        document.getElementById("epr-time1").checked ? 1991 : 2015,
-      ];
+      // t = [
+      //   "==",
+      //   ["get", "from"],
+      //   document.getElementById("epr-time1").checked ? 1991 : 2015,
+      // ];
       c = getCategoryFilter("epr", "group");
+      map.setFilter("epr-layer", c);
+      map.setFilter("epr-outline-layer", c);
       // combine + set filters
-      map.setFilter("epr-layer", ["all", c, t]);
-      map.setFilter("epr-outline-layer", ["all", c, t]);
+      // map.setFilter("epr-layer", ["all", c, t]);
+      // map.setFilter("epr-outline-layer", ["all", c, t]);
       break;
     case "powerplants":
       // no time filter
