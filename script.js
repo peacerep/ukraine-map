@@ -212,10 +212,12 @@ Promise.all([
         type: "Feature",
         geometry: {
           type: "LineString",
-          coordinates: [
+          coordinates: arcPoints(
             [+el.from_longitude, +el.from_latitude],
             [+el.to_longitude, +el.to_latitude],
-          ],
+            0.2,
+            20
+          ),
         },
         properties: el,
       };
