@@ -93,22 +93,16 @@ button#captureScreenshot {
 	margin-right: -2px;
 }
 
-#loading-message {
-	display: block;
-	position: absolute;
-	margin: auto;
-	left: 0;
-	right: 0;
-	width: 300px;
-	top: calc(50vh - 112px);
-	z-index: 9999;
-	background-color: #ffffffdb;
-	border-radius: 20px;
-	font-weight: bold;
-	color: #333;
-	font-size: 22px;
-	padding: 45px;
-	text-align: center;
+/*loading messages in sidebar*/
+.layerHeader.loading input {
+	opacity: 0;
+}
+.layerHeader.loading label {
+	color: #555;
+}
+.layerHeader.loading label.labelDataset::after {
+	content: "\A Loading...";
+	white-space: pre;
 }
 
 #sidebar {

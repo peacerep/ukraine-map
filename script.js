@@ -1,5 +1,10 @@
 "use strict";
 
+//uncheck all layers to overwrite any that might still be checked in cache
+document.querySelectorAll(".layerToggle").forEach((el) => {
+  el.checked = false;
+});
+
 const initBBox = [
   [21.2, 42.9], // [west, south]
   [41.5, 52.75], // [east, north]
@@ -29,9 +34,19 @@ const layerUnder = "place-other";
 const minZoom = map.getZoom() - 1;
 map.setMinZoom(minZoom);
 
-// add scale bar?
-
 const layers = ["acled", "ucdp", "epr", "powerplants", "hc"];
+
+// check for URL parameters
+const url = new URL(window.location.href);
+const layerSettings =
+  url.searchParams.has("layers") && url.searchParams.get("layers") == "hc"
+    ? // custom: hc only
+      { acled: false, ucdp: false, epr: false, powerplants: false, hc: true }
+    : // default settings
+      // sub-options for each layer are always all checked by default
+      { acled: true, ucdp: true, epr: false, powerplants: true, hc: false };
+
+// check boxes accordingly once layers are loaded (see end of map initialization function below)
 
 // make info boxes togglable
 layers.forEach((layer) => {
@@ -117,6 +132,8 @@ Object.keys(colorScheme).forEach(function (layer) {
     .attr("class", "checkmark")
     .style("background-color", (d) => d[1]);
 });
+// ensure nuclear-only toggle is checked (added in html)
+document.getElementById("toggle-nuclear-only").checked = true;
 
 // add zoom to region feature
 d3.json("data/ukraine_bounds.json").then(function (data) {
@@ -502,13 +519,17 @@ Promise.all([
       );
     });
 
-    // wait for data to load, then remove loading message
-    waitFor(() =>
-      layers.map((l) => map.isSourceLoaded(l)).every((v) => v)
-    ).then(() => {
-      document.getElementById("loading-message").style.display = "none";
-      resetFilters();
-    });
+    // wait for data to load, then remove loading messages
+    layers.map((l) =>
+      waitFor(() => map.isSourceLoaded(l)).then(() => {
+        document.getElementById(l + "-header").classList.remove("loading");
+        // check/uncheck based on layer settings
+        let c = document.getElementById("toggle-" + l);
+        c.checked = layerSettings[l];
+        // dispatch change event so the map updates
+        c.dispatchEvent(new Event("change"));
+      })
+    );
   });
 });
 
@@ -646,17 +667,16 @@ function updateFilters(layer) {
 }
 
 function resetFilters() {
-  // get list of all filter input checkboxes
-  let filters = document.querySelectorAll(".filterInput");
-  // check all of them
-  filters.forEach((el) => {
-    el.checked = true;
+  // set layer filters according to settings
+  layers.forEach((l) => {
+    document.getElementById("toggle-" + l).checked = layerSettings[l];
   });
 
-  // uncheck the ones that need to be unchecked instead
-  document.getElementById("toggle-epr").checked = false;
-  // document.getElementById("toggle-nuclear-only").checked = false;
-  document.getElementById("toggle-hc").checked = false;
+  // check all sub-options for all layers
+  let opt = document.querySelectorAll(".layerOptions input");
+  opt.forEach((el) => {
+    el.checked = true;
+  });
 
   // reset date inputs
   document.getElementById("min-date").value = "";

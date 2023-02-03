@@ -66,7 +66,6 @@
 				<button id="captureScreenshot" onclick="captureScreenshot()">
 					Capture screenshot of map
 				</button>
-				<div id="loading-message">Loading data...</div>
 			</div>
 			<div id="sidebar">
 				<h1>Conflict Map – Ukraine</h1>
@@ -89,13 +88,12 @@
 					/>
 				</div>
 
-				<div id="acled-header" class="layerHeader">
+				<div id="acled-header" class="layerHeader loading">
 					<input
 						type="checkbox"
 						name="ACLED"
 						id="toggle-acled"
 						class="filterInput layerToggle"
-						checked
 					/>
 					<label for="toggle-acled" class="labelDataset">
 						ACLED: Conflict Violence</label
@@ -127,13 +125,12 @@
 					</div>
 				</div>
 
-				<div id="ucdp-header" class="layerHeader">
+				<div id="ucdp-header" class="layerHeader loading">
 					<input
 						type="checkbox"
 						name="UCDP"
 						id="toggle-ucdp"
 						class="filterInput layerToggle"
-						checked
 					/>
 					<label for="toggle-ucdp" class="labelDataset">
 						UCDP: Deaths in conflict</label
@@ -160,13 +157,12 @@
 					</div>
 				</div>
 
-				<div id="epr-header" class="layerHeader">
+				<div id="epr-header" class="layerHeader loading">
 					<input
 						type="checkbox"
 						name="EPR"
 						id="toggle-epr"
 						class="filterInput layerToggle"
-						checked
 					/>
 					<label for="toggle-epr" class="labelDataset">
 						EPR: Ethnic Makeup (2021)</label
@@ -187,35 +183,15 @@
 						Russia/Soviet Union as coded in the original data since
 						2014.
 					</div>
-					<div id="epr-options" class="layerOptions">
-						<!-- <div class="switchContainer">
-							<input
-								type="radio"
-								id="epr-time1"
-								name="epr-subset"
-								class="filterInput"
-							/><label for="epr-time1" class="left"
-								>1991–2014</label
-							><input
-								type="radio"
-								id="epr-time2"
-								name="epr-subset"
-								class="filterInput"
-								checked
-							/><label for="epr-time2" class="right"
-								>2015–2021</label
-							>
-						</div> -->
-					</div>
+					<div id="epr-options" class="layerOptions"></div>
 				</div>
 
-				<div id="powerplants-header" class="layerHeader">
+				<div id="powerplants-header" class="layerHeader loading">
 					<input
 						type="checkbox"
 						name="Power Plants"
 						id="toggle-powerplants"
 						class="filterInput layerToggle"
-						checked
 					/>
 					<label for="toggle-powerplants" class="labelDataset">
 						Power Plants</label
@@ -247,13 +223,12 @@
 					</div>
 				</div>
 
-				<div id="hc-header" class="layerHeader">
+				<div id="hc-header" class="layerHeader loading">
 					<input
 						type="checkbox"
 						name="Humanitarian Corridors"
 						id="toggle-hc"
 						class="filterInput layerToggle"
-						checked
 					/>
 					<label for="toggle-hc" class="labelDataset">
 						Humanitarian Corridors</label
