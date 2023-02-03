@@ -79,9 +79,9 @@ let colorScheme = {
   ],
   // UCDP type_of_violence color scheme
   ucdp: [
-    [1, d3.schemeTableau10[6]],
-    [2, d3.schemeTableau10[7]],
-    [3, d3.schemeTableau10[8]],
+    ["1", d3.schemeTableau10[6]],
+    ["2", d3.schemeTableau10[7]],
+    ["3", d3.schemeTableau10[8]],
   ],
   // humanitarian corridors status_result color scheme
   hc: [
@@ -165,21 +165,48 @@ d3.json("data/ukraine_bounds.json").then(function (data) {
 });
 
 Promise.all([
-  d3.json("data/1900-01-01-2022-08-07-Ukraine.geojson"), // ACLED
-  d3.json("data/ucdp_geojson.json"), // UCDP
+  d3.csv("data/ACLED-Ukraine.csv"), // ACLED
+  d3.csv("data/UCDP-Ukraine.csv"), // UCDP
   d3.csv("data/global_power_plant_database_ukraine.csv"), // power plant locations
   d3.csv("data/ukraine_power_plants_extra_info.csv"), // power plant additional data
   d3.json("data/GeoEPR-2021-Ukraine.geojson"), // EPR ethnic makeup
   d3.csv("data/Humanitarian Corridors Ukraine - HC_geocoded.csv"), // humanitarian corridors
 ]).then(function (data) {
   // modify data
-  const acled = data[0];
+
+  // turn acled csv into geojson
+  const acled = {
+    type: "FeatureCollection",
+    features: data[0].map((e) => {
+      return {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [e.longitude, e.latitude],
+        },
+        properties: e,
+      };
+    }),
+  };
   acled.features.forEach(function (d) {
     d.properties.timestamp_start = new Date(d.properties.event_date).getTime();
     d.properties.timestamp_end = new Date(d.properties.event_date).getTime();
   });
 
-  const ucdp = data[1];
+  // turn ucdp csv into geojson
+  const ucdp = {
+    type: "FeatureCollection",
+    features: data[1].map(function (e) {
+      return {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [e.longitude, e.latitude],
+        },
+        properties: e,
+      };
+    }),
+  };
   ucdp.features.forEach(function (d) {
     d.properties.timestamp_start = new Date(d.properties.date_start).getTime();
     d.properties.timestamp_end = new Date(d.properties.date_end).getTime();
