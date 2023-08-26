@@ -177,7 +177,7 @@ Promise.all([
 ]).then(function (data) {
   // log data loading
   console.log("All Data Loaded:", data);
-  
+
   // modify data
 
   // turn acled csv into geojson
@@ -553,16 +553,33 @@ Promise.all([
     });
 
     // wait for data to load, then remove loading messages
-    layers.map((l) =>
+    // layers.map((l) =>
+    //   waitFor(() => map.isSourceLoaded(l)).then(() => {
+    //     document.getElementById(l + "-header").classList.remove("loading");
+    //     // check/uncheck based on layer settings
+    //     let c = document.getElementById("toggle-" + l);
+    //     c.checked = layerSettings[l];
+    //     // dispatch change event so the map updates
+    //     c.dispatchEvent(new Event("change"));
+    //   })
+    // );
+
+    layers.map((l) => {
+      console.log("Checking for source:", l);
       waitFor(() => map.isSourceLoaded(l)).then(() => {
+        console.log("Source loaded:", l);
         document.getElementById(l + "-header").classList.remove("loading");
+        // ... rest of your code
         // check/uncheck based on layer settings
         let c = document.getElementById("toggle-" + l);
         c.checked = layerSettings[l];
         // dispatch change event so the map updates
         c.dispatchEvent(new Event("change"));
-      })
-    );
+      }).catch(error => {
+        console.error("Error waiting for source", l, error);
+      });
+    });
+    
   });
 });
 
