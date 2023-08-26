@@ -283,6 +283,309 @@ Promise.all([
   // check if map ready?
   if (map.loaded()) {
       console.log("=checker= The map is already loaded.");
+
+
+        map.addSource("acled", {
+          type: "geojson",
+          data: acled,
+        });
+    
+        map.addSource("ucdp", {
+          type: "geojson",
+          data: ucdp,
+        });
+    
+        map.addSource("epr", {
+          type: "geojson",
+          data: epr,
+        });
+    
+        map.addSource("powerplants", {
+          type: "geojson",
+          data: powerplants_geojson,
+        });
+    
+        map.addSource("hc", {
+          type: "geojson",
+          data: hc_geojson,
+        });
+    
+        var popup = new maplibregl.Popup();
+    
+        map.addLayer(
+          {
+            id: "epr-layer",
+            type: "fill",
+            source: "epr",
+            paint: {
+              "fill-color": [
+                "match",
+                ["get", "group"],
+                ...colorScheme.epr.flat(),
+                eprColor, // for missing types
+              ],
+              "fill-opacity": 0.25,
+            },
+            layout: {
+              visibility: "none",
+            },
+          },
+          layerUnder
+        );
+        map.addLayer(
+          {
+            id: "epr-outline-layer",
+            type: "line",
+            source: "epr",
+            paint: {
+              "line-color": [
+                "match",
+                ["get", "group"],
+                ...colorScheme.epr.flat(),
+                eprColor, // for missing types
+              ],
+              "line-width": 1,
+            },
+            layout: {
+              visibility: "none",
+            },
+          },
+          layerUnder
+        );
+        map.on("click", "epr-layer", (e) => {
+          var coordinates = e.lngLat;
+          var tooltip = "Ethnic group: " + e.features[0].properties.group;
+          popup.setLngLat(coordinates).setHTML(tooltip).addTo(map);
+        });
+    
+        map.addLayer(
+          {
+            id: "acled-layer",
+            type: "circle",
+            source: "acled",
+            paint: {
+              "circle-color": [
+                "match",
+                ["get", "event_type"],
+                ...colorScheme.acled.flat(),
+                d3.schemeTableau10[9], // grey for missing types
+              ],
+              "circle-opacity": 0.7,
+              "circle-radius": 4,
+            },
+            layout: {
+              visibility: "none",
+            },
+          },
+          layerUnder
+        );
+    
+        map.addLayer(
+          {
+            id: "ucdp-layer",
+            type: "circle",
+            source: "ucdp",
+            paint: {
+              "circle-color": [
+                "match",
+                ["get", "type_of_violence"],
+                ...colorScheme.ucdp.flat(),
+                d3.schemeTableau10[9], // grey for missing types
+              ],
+              "circle-opacity": 0.7,
+              "circle-radius": 4,
+            },
+            layout: {
+              visibility: "none",
+            },
+          },
+          layerUnder
+        );
+    
+        map.loadImage("img/symbol_power.png", (error, img1) => {
+          map.loadImage("img/symbol_nuclear.png", (error, img2) => {
+            map.loadImage("img/symbol_nuclear_decom.png", (error, img3) => {
+              map.addImage("symbol_power", img1);
+              map.addImage("symbol_nuclear", img2);
+              map.addImage("symbol_nuclear_decom", img3);
+    
+              map.addLayer(
+                {
+                  id: "powerplants-layer",
+                  type: "symbol",
+                  source: "powerplants",
+                  layout: {
+                    visibility: "none",
+                    "icon-allow-overlap": true,
+                    "icon-image": [
+                      "case",
+                      ["==", ["get", "primary_fuel"], "Nuclear"],
+                      "symbol_nuclear",
+                      [
+                        "case",
+                        [
+                          "==",
+                          ["get", "primary_fuel"],
+                          "Nuclear – undergoing decommissioning",
+                        ],
+                        "symbol_nuclear_decom",
+                        "symbol_power",
+                      ],
+                    ],
+                    "icon-size": 0.5,
+                    "symbol-sort-key": [
+                      "case",
+                      [
+                        "any",
+                        ["==", ["get", "primary_fuel"], "Nuclear"],
+                        [
+                          "==",
+                          ["get", "primary_fuel"],
+                          "Nuclear – undergoing decommissioning",
+                        ],
+                      ],
+                      1,
+                      0,
+                    ],
+                  },
+                },
+                layerUnder
+              );
+            });
+          });
+        });
+    
+        map.on("click", "powerplants-layer", (e) => {
+          var coordinates = e.features[0].geometry.coordinates.slice();
+          var tooltip =
+            "<b>" +
+            e.features[0].properties.name +
+            " (" +
+            e.features[0].properties.primary_fuel +
+            ")</b><br>" +
+            e.features[0].properties.tooltip_info +
+            "<br><b>Source:</b> " +
+            e.features[0].properties.additional_info_source_with_html;
+          popup.setLngLat(coordinates).setHTML(tooltip).addTo(map);
+        });
+        // change cursor to pointer when on the powerplants layer
+        map.on("mouseenter", "powerplants-layer", () => {
+          map.getCanvas().style.cursor = "pointer";
+        });
+        map.on("mouseleave", "powerplants-layer", () => {
+          map.getCanvas().style.cursor = "";
+        });
+    
+        map.addLayer(
+          {
+            id: "hc-layer",
+            type: "line",
+            source: "hc",
+            layout: {
+              visibility: "none",
+              "line-join": "round",
+              "line-cap": "round",
+            },
+            paint: {
+              "line-color": [
+                "match",
+                ["get", "status_result"],
+                ...colorScheme.hc.flat(),
+                d3.schemeTableau10[9], // grey for missing types
+              ],
+              "line-width": 5,
+              "line-opacity": 0.6,
+            },
+          },
+          layerUnder
+        );
+        map.on("click", "hc-layer", (e) => {
+          var coordinates = e.lngLat;
+          var tooltip =
+            "Humanitarian Corridor:<br>Date: " +
+            e.features[0].properties.date +
+            "<br>From " +
+            e.features[0].properties.from_name +
+            " (" +
+            e.features[0].properties.from_country_code +
+            ") to " +
+            e.features[0].properties.to_name +
+            " (" +
+            e.features[0].properties.to_country_code +
+            ")<br>Status: " +
+            e.features[0].properties.status_result;
+          popup.setLngLat(coordinates).setHTML(tooltip).addTo(map);
+        });
+        // change cursor to pointer when on the powerplants layer
+        map.on("mouseenter", "hc-layer", () => {
+          map.getCanvas().style.cursor = "pointer";
+        });
+        map.on("mouseleave", "hc-layer", () => {
+          map.getCanvas().style.cursor = "";
+        });
+    
+        map.loadImage("img/arrow2.png", function (err, image) {
+          if (err) {
+            console.error("err image", err);
+            return;
+          }
+          map.addImage("arrow", image, { sdf: "true" });
+          map.addLayer(
+            {
+              id: "hc-arrow-layer",
+              type: "symbol",
+              source: "hc",
+              layout: {
+                visibility: "none",
+                "symbol-placement": "line",
+                "symbol-spacing": 1,
+                "icon-allow-overlap": true,
+                "icon-ignore-placement": true,
+                "icon-image": "arrow",
+                "icon-size": 5 / 24, // icon size is 24, scale to line width
+              },
+              paint: {
+                "icon-color": [
+                  "match",
+                  ["get", "status_result"],
+                  ...colorScheme.hc.flat(),
+                  d3.schemeTableau10[9], // grey for missing types
+                ],
+              },
+            },
+            layerUnder
+          );
+        });
+    
+        // wait for data to load, then remove loading messages
+        // layers.map((l) =>
+        //   waitFor(() => map.isSourceLoaded(l)).then(() => {
+        //     document.getElementById(l + "-header").classList.remove("loading");
+        //     // check/uncheck based on layer settings
+        //     let c = document.getElementById("toggle-" + l);
+        //     c.checked = layerSettings[l];
+        //     // dispatch change event so the map updates
+        //     c.dispatchEvent(new Event("change"));
+        //   })
+        // );
+    
+        layers.map((l) => {
+          console.log("Checking for source:", l);
+          waitFor(() => map.isSourceLoaded(l)).then(() => {
+            console.log("Source loaded:", l);
+            document.getElementById(l + "-header").classList.remove("loading");
+            // ... rest of your code
+            // check/uncheck based on layer settings
+            let c = document.getElementById("toggle-" + l);
+            c.checked = layerSettings[l];
+            // dispatch change event so the map updates
+            c.dispatchEvent(new Event("change"));
+          }).catch(error => {
+            console.error("Error waiting for source", l, error);
+          });
+        });
+        
+
   } else {
       // map.on("load", function() {
       //     console.log("=checker= Map just finished loading.");
