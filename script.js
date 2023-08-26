@@ -46,6 +46,7 @@ const layerSettings =
     : // default settings
       // sub-options for each layer are always all checked by default
       { acled: true, ucdp: true, epr: false, powerplants: true, hc: false };
+console.log("layerSettings", layerSettings)
 
 // check boxes accordingly once layers are loaded (see end of map initialization function below)
 
@@ -63,6 +64,7 @@ layers.forEach((layer) => {
     // show popup
     d3.select("#" + layer + "-info-box").classed("hidden", false);
   });
+  console.log("layers", layers)
 });
 
 // auto-generate options boxes for three of the datasets
@@ -278,8 +280,19 @@ Promise.all([
     d.properties.timestamp_end = new Date(d.properties.date).getTime();
   });
 
+  // check if map ready?
+  if (map.loaded()) {
+      console.log("=checker= The map is already loaded.");
+  } else {
+      map.on("load", function() {
+          console.log("=checker= Map just finished loading.");
+      });
+  }
+
+
   // when map is ready, add data sources + vis layers
   map.on("load", function () {
+    console.log("loaded the map.on()")
     map.addSource("acled", {
       type: "geojson",
       data: acled,
