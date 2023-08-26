@@ -38,6 +38,7 @@ const layers = ["acled", "ucdp", "epr", "powerplants", "hc"];
 
 // check for URL parameters
 const url = new URL(window.location.href);
+console.log("get url parameters", url)
 const layerSettings =
   url.searchParams.has("layers") && url.searchParams.get("layers") == "hc"
     ? // custom: hc only
@@ -137,6 +138,8 @@ document.getElementById("toggle-nuclear-only").checked = true;
 
 // add zoom to region feature
 d3.json("data/ukraine_bounds.json").then(function (data) {
+  // check data
+  console.log("ukriane bounds", data)
   // get zoom options dropdown and add all admin regions as options
   let zoom_options = d3.select("#selectZoomTo");
   zoom_options.append("optgroup").attr("label", "Administrative Regions");
@@ -172,6 +175,9 @@ Promise.all([
   d3.json("data/GeoEPR-2021-Ukraine.geojson"), // EPR ethnic makeup
   d3.csv("data/Humanitarian Corridors Ukraine - HC_geocoded.csv"), // humanitarian corridors
 ]).then(function (data) {
+  // log data loading
+  console.log("All Data Loaded:", data);
+  
   // modify data
 
   // turn acled csv into geojson
