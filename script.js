@@ -284,9 +284,10 @@ Promise.all([
   if (map.loaded()) {
       console.log("=checker= The map is already loaded.");
   } else {
-      map.on("load", function() {
-          console.log("=checker= Map just finished loading.");
-      });
+      // map.on("load", function() {
+      //     console.log("=checker= Map just finished loading.");
+      // });
+      console.log("not loaded for now.")
   }
 
 
