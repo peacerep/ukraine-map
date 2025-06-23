@@ -165,7 +165,7 @@ d3.json("data/ukraine_bounds.json").then(function (data) {
 });
 
 Promise.all([
-  d3.csv("https://github.com/peacerep/ukraine-map/releases/download/v0625/ACLED-Ukraine.csv"), // ACLED
+  d3.csv("data/ACLED-Ukraine.csv"), // ACLED
   d3.csv("data/UCDP-Ukraine.csv"), // UCDP
   d3.csv("data/global_power_plant_database_ukraine.csv"), // power plant locations
   d3.csv("data/ukraine_power_plants_extra_info.csv"), // power plant additional data
